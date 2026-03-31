@@ -1,0 +1,6 @@
+#!/bin/sh
+
+exec java \
+    -Xms${RELAY_SERVER_XMS:-256m} \
+    -Xmx${RELAY_SERVER_XMX:-512m} \
+    -jar $JAR_NAME

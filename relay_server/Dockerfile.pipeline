@@ -1,0 +1,26 @@
+FROM eclipse-temurin:21-jre-alpine
+
+ENV BUILD_DIR=/docker
+ENV ENTRY_DIR=/app
+ENV JAR_NAME=relay_server.jar
+
+WORKDIR $ENTRY_DIR
+
+RUN addgroup -S relaygroup && \
+    adduser -S relayuser -G relaygroup
+
+# copy pre-build jar file from CI/CD build task
+COPY --chown=relayuser:relaygroup $BUILD_DIR/$JAR_NAME $ENTRY_DIR/$JAR_NAME
+COPY --chown=relayuser:relaygroup $BUILD_DIR/entrypoint $ENTRY_DIR/entrypoint
+
+RUN sed -i \
+  -e "s/\$JAR_NAME/$JAR_NAME/g" \
+  entrypoint
+
+LABEL maintainer="Miłosz Gilga <miloszgilga@gmail.com>"
+
+EXPOSE 8080 1883
+
+USER relayuser
+
+ENTRYPOINT [ "./entrypoint" ]

@@ -1,3 +1,12 @@
+relay_server/.idea/
+relay_server/!.idea/misc.xml
+relay_server/!.idea/inspectionProfiles/
+relay_server/!.idea/codeStyles/
+relay_server/.bin
+relay_server/.gradle
+relay_server/build/
+relay_server/out/
+
 .DS_Store
 .env
 setup_data

@@ -1,0 +1,9 @@
+[versions]
+shadow = "8.3.0"
+logback = "1.5.32"
+
+[libraries]
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
