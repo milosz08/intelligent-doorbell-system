@@ -41,7 +41,7 @@ multiplatform mobile/desktop apps, supported by single-click OTA updates.
 
 ## Software
 
-### ESP32 firmware
+### ESP32C3 firmware
 
 [TBD]
 
@@ -49,7 +49,7 @@ multiplatform mobile/desktop apps, supported by single-click OTA updates.
 
 [TBD]
 
-### Provisioning tool (certgen and ESP32 flashing)
+### Provisioning tool (ESP32C3 flashing)
 
 [TBD]
 
