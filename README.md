@@ -21,7 +21,14 @@ multiplatform mobile/desktop apps, supported by single-click OTA updates.
 
 <img src=".github/diagram/infra.svg" width="100%">
 
-[TBD]
+The client communicates with the local network via a secure tunnel (WSS), eliminating the need for a public IP address
+and NAT rule configuration on the edge firewall. External traffic is received by a daemon on the edge server and routed
+to a containerized intermediary node (Relay Server). This internal service manages the asynchronous message exchange
+with a local MQTT broker. The IoT endpoint maintains a persistent TCP session with the broker, subscribing to command
+topics and publishing its operational status. Ultimately, the microcontroller translates the received network packets
+into physical logical state changes on GPIO pins, directly driving the relay module. Isolating the Relay Server as an
+independent component enables the delegation of business logic, database persistence, and telemetry archiving outside
+the embedded layer.
 
 ## Hardware
 
