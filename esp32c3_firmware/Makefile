@@ -3,7 +3,7 @@ PROJECT_NAME := esp32_firmware
 VER ?= 0.0.1-local-dev
 VER_FLAG := -DCMD_APP_VER="$(VER)"
 
-PORT ?= COM3 # communication port for ESP32 board
+PORT ?= COM4 # communication port for ESP32 board
 BAUD ?= 921600 # flashing speed
 
 export VER # export version for doxygen (win/unix)
