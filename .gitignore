@@ -1,3 +1,6 @@
+esp32c3_firmware/build/
+esp32c3_firmware/sdkconfig
+
 relay_server/.idea/
 relay_server/!.idea/misc.xml
 relay_server/!.idea/inspectionProfiles/
