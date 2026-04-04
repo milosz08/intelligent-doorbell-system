@@ -52,6 +52,10 @@ the embedded layer.
 
 [TBD]
 
+### Java relay server with embed MQTT broker
+
+[TBD]
+
 ### Multi-platform client
 
 [TBD]
