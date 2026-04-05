@@ -1,4 +1,4 @@
-# Intelligent doorbell
+# Intelligent doorbell system
 
 This ESP32-C3 and W5500 Ethernet doorbell uses BC337 transistors in a Wired-OR setup to integrate a physical button with
 digital logic. Two relays manage a 230V bell for triggering and silent mode blocking, while the hardware configuration

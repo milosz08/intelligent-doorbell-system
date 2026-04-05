@@ -80,5 +80,5 @@ jobs:
           context: ./relay_server
           file: ./relay_server/Dockerfile.pipeline
           push: true
-          tags: ghcr.io/milosz08/intelligent-door-bell-relay-server:${{ inputs.version || 'latest' }}
+          tags: ghcr.io/milosz08/intelligent-doorbell-relay-server:${{ inputs.version || 'latest' }}
           platforms: linux/amd64,linux/arm64
