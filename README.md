@@ -52,7 +52,7 @@ the embedded layer.
 
 [TBD]
 
-### Java relay server with embed MQTT broker
+### Java relay server with embed MQTT broker and mDNS
 
 [TBD]
 
