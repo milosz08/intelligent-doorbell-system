@@ -7,4 +7,7 @@ idf_component_register(
 
   REQUIRES
     log
+    esp_driver_gpio
+    freertos
+    eth_w5500
 )
