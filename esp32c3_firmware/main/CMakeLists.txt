@@ -1,13 +1,17 @@
 idf_component_register(
-  SRCS
-    "main.c"
+    SRCS
+        "main.c"
 
-  INCLUDE_DIRS
-    "."
+    INCLUDE_DIRS
+        "."
 
-  REQUIRES
-    log
-    esp_driver_gpio
-    freertos
-    eth_w5500
+    REQUIRES
+        log
+        app_state
+        cyclic_task
+        env_sensor
+        eth_w5500
+        mdns_service
+        mqtt_bus
+        mqtt_registry
 )

@@ -1,21 +1,19 @@
+#include "app_state.h"
+#include "cyclic_task.h"
+#include "env_sensor.h"
 #include "eth_w5500.h"
+#include "mdns_service.h"
+#include "mqtt_bus.h"
+#include "mqtt_registry.h"
 
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/timers.h"
 
 // private api ---------------------------------------------------------------------------------------------------------
 
 static const char *TAG = "MAIN";
-
-static TimerHandle_t act_led_timer = NULL;
-
-#define PIN_ETH_LINK  GPIO_NUM_21
-#define PIN_ETH_DATA  GPIO_NUM_20
 
 #define CHECK_CRITICAL(x, msg) do { \
   esp_err_t err_rc = (x); \
@@ -24,35 +22,20 @@ static TimerHandle_t act_led_timer = NULL;
   } \
 } while(0)
 
-static void turn_off_led_callback(TimerHandle_t xTimer)
-{
-  gpio_set_level(PIN_ETH_DATA, 1);
-}
-
 static void link_state_changed(bool on)
 {
-  gpio_set_level(PIN_ETH_LINK, on ? 0 : 1);
+  // TODO
 }
 
 static void packet_received(void)
 {
-  if (act_led_timer != NULL)
-  {
-    gpio_set_level(PIN_ETH_DATA, 0);
-    xTimerReset(act_led_timer, 0);
-  }
+  // TODO
 }
 
 static void on_eth_boot_wait(bool linked)
 {
-  if (!linked)
-  {
-    ESP_LOGW(TAG, "not linked");
-  }
-  else
-  {
-    ESP_LOGI(TAG, "linked");
-  }
+  if (!linked) ESP_LOGW(TAG, "eth not linked");
+  else ESP_LOGI(TAG, "eth linked");
   link_state_changed(linked);
 }
 
@@ -60,25 +43,42 @@ static void on_eth_boot_wait(bool linked)
 
 void app_main(void)
 {
-  CHECK_CRITICAL(esp_netif_init(), "Netif fail");
-  CHECK_CRITICAL(esp_event_loop_create_default(), "EventLoop fail");
-  CHECK_CRITICAL(gpio_install_isr_service(0), "GPIO ISR fail"); // enable interrupts
+    // init global state
+    CHECK_CRITICAL(app_state_init(), "App state init fail");
 
-  gpio_reset_pin(PIN_ETH_LINK);
-  gpio_reset_pin(PIN_ETH_DATA);
+    // init sensor
+    CHECK_CRITICAL(env_sensor_init(), "Env sensor init fail");
 
-  gpio_set_direction(PIN_ETH_LINK, GPIO_MODE_OUTPUT);
-  gpio_set_direction(PIN_ETH_DATA, GPIO_MODE_OUTPUT);
+    // init esp-idf services
+    CHECK_CRITICAL(esp_netif_init(), "Netif init fail");
+    CHECK_CRITICAL(esp_event_loop_create_default(), "EventLoop init fail");
+    CHECK_CRITICAL(gpio_install_isr_service(0), "GPIO ISR init fail"); // enable interrupts
 
-  gpio_set_level(PIN_ETH_LINK, 1);
-  gpio_set_level(PIN_ETH_DATA, 1);
+    // init ethernet
+    eth_callbacks_t eth_callbacks = {
+        .on_link_state_changed  = link_state_changed,
+        .on_packet_received     = packet_received,
+    };
+    CHECK_CRITICAL(eth_w5500_init(&eth_callbacks), "Ethernet init fail");
+    eth_w5500_force_link_blocking(on_eth_boot_wait);
 
-  act_led_timer = xTimerCreate("act_timer", pdMS_TO_TICKS(100), pdFALSE, (void *)0, turn_off_led_callback);
+    // init mdns service and wait for IPv4 address
+    char broker_uri[64] = {0};
+    mdns_service_config_t mdns_cfg = {
+        .hostname       = "esp32c3-doorbell",
+        .instance_name  = "Intelligent doorbell",
+    };
+    CHECK_CRITICAL(mdns_service_init(&mdns_cfg), "mDNS init fail");
+    mdns_service_wait_for_mqtt_broker(broker_uri, sizeof(broker_uri), 3000, 5000);
 
-  eth_callbacks_t eth_callbacks = {
-    .on_link_state_changed = link_state_changed,
-    .on_packet_received = packet_received
-  };
-  CHECK_CRITICAL(eth_w5500_init(&eth_callbacks), "Ethernet fail");
-  eth_w5500_force_link_blocking(on_eth_boot_wait);
+    // init mqtt bus and registry
+    mqtt_bus_config_t mqtt_cfg = {
+        .broker_uri = broker_uri,
+        .auth_salt  = "MojaTajnaSol", // TODO: getting from NVM
+    };
+    CHECK_CRITICAL(mqtt_bus_init(&mqtt_cfg), "MQTT bus init fail");
+    CHECK_CRITICAL(mqtt_registry_init(), "MQTT registry init fail");
+
+    // init cyclic tasks
+    CHECK_CRITICAL(cyclic_task_init(), "Cyclic tasks init fail");
 }

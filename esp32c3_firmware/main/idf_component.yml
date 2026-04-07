@@ -1,2 +1,3 @@
 dependencies:
   espressif/mdns: "^1.11.0"
+  espressif/ds18b20: "^0.3.0"
