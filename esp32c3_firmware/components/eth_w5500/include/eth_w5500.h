@@ -22,8 +22,8 @@
 /*! \brief Callbacks for Ethernet events. */
 typedef struct
 {
-  void (*on_link_state_changed)(bool is_up);  /*!< Called when cable is plugged/unplugged. */
-  void (*on_packet_received)(void);           /*!< Called on RX activity (useful for blinking LEDs). */
+    void (*on_link_state_changed)(bool is_up);  /*!< Called when cable is plugged/unplugged. */
+    void (*on_packet_received)(void);           /*!< Called on RX activity (useful for blinking LEDs). */
 } eth_callbacks_t;
 
 /*! \brief Callback type for boot-time link waiting process.
