@@ -16,27 +16,27 @@
 static const char *TAG = "MAIN";
 
 #define CHECK_CRITICAL(x, msg) do { \
-  esp_err_t err_rc = (x); \
-  if (err_rc != ESP_OK) { \
-    ESP_LOGE(TAG, msg); \
-  } \
+    esp_err_t err_rc = (x); \
+    if (err_rc != ESP_OK) { \
+        ESP_LOGE(TAG, msg); \
+    } \
 } while(0)
 
 static void link_state_changed(bool on)
 {
-  // TODO
+    // TODO
 }
 
 static void packet_received(void)
 {
-  // TODO
+    // TODO
 }
 
 static void on_eth_boot_wait(bool linked)
 {
-  if (!linked) ESP_LOGW(TAG, "eth not linked");
-  else ESP_LOGI(TAG, "eth linked");
-  link_state_changed(linked);
+    if (!linked) ESP_LOGW(TAG, "eth not linked");
+    else ESP_LOGI(TAG, "eth linked");
+    link_state_changed(linked);
 }
 
 // public api ----------------------------------------------------------------------------------------------------------
