@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    id("java")
+    alias(libs.plugins.java)
     alias(libs.plugins.shadow)
 }
 
@@ -10,10 +10,15 @@ version = getEnv("VERSION", "latest")
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://www.jitpack.io") // for moquette broker
+    }
 }
 
 dependencies {
+    implementation(libs.jmdns)
     implementation(libs.logback.classic)
+    implementation(libs.moquette.broker)
 }
 
 tasks.withType<ShadowJar> {
