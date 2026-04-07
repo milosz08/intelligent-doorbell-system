@@ -9,16 +9,32 @@
   ],
   "editor.stickyScroll.enabled": false,
   "editor.stickyScroll.scrollWithEditor": false,
-  "editor.tabSize": 2,
+  "editor.tabSize": 4,
   "explorer.autoReveal": false,
-  "explorer.compactFolders": false,
   "files.insertFinalNewline": true,
   "git.autofetch": false,
-  "workbench.colorTheme": "Dark Modern",
+  "terminal.integrated.profiles.windows": {
+    "ESP-IDF PowerShell": {
+      "source": "PowerShell",
+      "icon": "chip",
+      "args": [
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "&",
+        "'D:\\programs\\espressif\\Initialize-Idf.ps1'",
+        "-IdfId",
+        "esp-idf-2f7c37af3bab0e366d21130bb3c49645",
+        ";",
+        "Set-Location",
+        "'${workspaceFolder}\\esp32c3_firmware'"
+      ]
+    }
+  },
   "workbench.editor.enablePreview": false,
-  "workbench.iconTheme": "vsc-jetbrains-icons-enhanced",
   "workbench.startupEditor": "none",
   "workbench.tree.enableStickyScroll": false,
-  "workbench.tree.indent": 20,
-  "workbench.tree.renderIndentGuides": "always"
+  "workbench.tree.indent": 18,
+  "workbench.tree.renderIndentGuides": "always",
 }

@@ -1,5 +1,8 @@
 {
   "recommendations": [
-    "hediet.vscode-drawio"
+    "hediet.vscode-drawio",
+    "k--kato.intellij-idea-keybindings",
+    "redhat.java",
+    "vscjava.vscode-gradle"
   ]
 }
