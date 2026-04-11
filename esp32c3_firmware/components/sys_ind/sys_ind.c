@@ -93,9 +93,9 @@ esp_err_t sys_ind_init(void)
     if (err != ESP_OK) return err;
 
     // turn off leds
-    gpio_set_level(ETH_LINK_GREEN_LED_PIN, 1);
-    gpio_set_level(ETH_ACTIVITY_YELLOW_LED_PIN, 1);
-    gpio_set_level(STATUS_BLUE_LED_PIN, 1);
+    sys_ind_led_set_state(ETH_LINK_GREEN_LED_PIN, false);
+    sys_ind_led_set_state(ETH_ACTIVITY_YELLOW_LED_PIN, false);
+    sys_ind_led_set_state(STATUS_BLUE_LED_PIN, false);
 
     act_led_timer = xTimerCreate("act_timer", pdMS_TO_TICKS(LED_HOLD_TIME_MS), pdFALSE,
                                  (void *)ETH_ACTIVITY_YELLOW_LED_PIN, turn_off_led_callback);
