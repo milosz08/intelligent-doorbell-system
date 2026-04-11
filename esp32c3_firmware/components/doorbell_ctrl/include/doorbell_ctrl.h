@@ -8,7 +8,7 @@
 
 #define DOORBELL_SSR_PIN            GPIO_NUM_0  /*!< GPIO pin for the SSR (triggers the physical chime). */
 #define DOORBELL_SILENT_RELAY_PIN   GPIO_NUM_10 /*!< GPIO pin for the mechanical relay (disconnects AC for silent mode). */
-#define DOORBELL_AC_DETECT_PIN      GPIO_NUM_8 /*!< GPIO pin for the optocoupler (detects 230V AC physical button press). */
+#define DOORBELL_AC_DETECT_PIN      GPIO_NUM_8  /*!< GPIO pin for the optocoupler (detects 230V AC physical button press). */
 
 #define DOORBELL_SSR_PULSE_MS       500 /*!< Duration in milliseconds to keep the SSR closed when triggered. */
 #define DOORBELL_RELAY_ON           0   /*!< Logic level to energize the relay (active low). */
