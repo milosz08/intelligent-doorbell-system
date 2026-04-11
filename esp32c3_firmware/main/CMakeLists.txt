@@ -6,7 +6,6 @@ idf_component_register(
         "."
 
     REQUIRES
-        log
         app_state
         cyclic_task
         env_sensor

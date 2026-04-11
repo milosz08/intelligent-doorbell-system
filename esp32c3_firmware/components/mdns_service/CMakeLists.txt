@@ -6,6 +6,5 @@ idf_component_register(
         "include"
 
     REQUIRES
-        log
         mdns
 )
