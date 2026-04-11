@@ -5,8 +5,8 @@
 #include "mdns_service.h"
 #include "mqtt_bus.h"
 #include "mqtt_registry.h"
+#include "sys_ind.h"
 
-#include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event.h"
@@ -18,31 +18,29 @@ static const char *TAG = "MAIN";
 #define CHECK_CRITICAL(x, msg) do { \
     esp_err_t err_rc = (x); \
     if (err_rc != ESP_OK) { \
+        sys_ind_status_critical_start(); \
         ESP_LOGE(TAG, msg); \
     } \
 } while(0)
-
-static void link_state_changed(bool on)
-{
-    // TODO
-}
-
-static void packet_received(void)
-{
-    // TODO
-}
 
 static void on_eth_boot_wait(bool linked)
 {
     if (!linked) ESP_LOGW(TAG, "eth not linked");
     else ESP_LOGI(TAG, "eth linked");
-    link_state_changed(linked);
+    sys_ind_led_eth_set_link(linked);
 }
 
 // public api ----------------------------------------------------------------------------------------------------------
 
 void app_main(void)
 {
+    // enable interupts (before all)
+    esp_err_t isr_err = gpio_install_isr_service(0);
+    if (isr_err != ESP_OK && isr_err != ESP_ERR_INVALID_STATE) ESP_LOGE(TAG, "GPIO ISR init fail");
+
+    // init system indicators
+    if (sys_ind_init() != ESP_OK) ESP_LOGE(TAG, "Sys ind init fail");
+
     // init global state
     CHECK_CRITICAL(app_state_init(), "App state init fail");
 
@@ -52,12 +50,11 @@ void app_main(void)
     // init esp-idf services
     CHECK_CRITICAL(esp_netif_init(), "Netif init fail");
     CHECK_CRITICAL(esp_event_loop_create_default(), "EventLoop init fail");
-    CHECK_CRITICAL(gpio_install_isr_service(0), "GPIO ISR init fail"); // enable interrupts
 
     // init ethernet
     eth_callbacks_t eth_callbacks = {
-        .on_link_state_changed  = link_state_changed,
-        .on_packet_received     = packet_received,
+        .on_link_state_changed  = sys_ind_led_eth_set_link,
+        .on_packet_received     = sys_ind_led_eth_packet_activity,
     };
     CHECK_CRITICAL(eth_w5500_init(&eth_callbacks), "Ethernet init fail");
     eth_w5500_force_link_blocking(on_eth_boot_wait);
@@ -81,4 +78,6 @@ void app_main(void)
 
     // init cyclic tasks
     CHECK_CRITICAL(cyclic_task_init(), "Cyclic tasks init fail");
+
+    sys_ind_status_blink_normal();
 }

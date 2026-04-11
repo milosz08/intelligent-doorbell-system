@@ -13,4 +13,5 @@ idf_component_register(
         mdns_service
         mqtt_bus
         mqtt_registry
+        sys_ind
 )
