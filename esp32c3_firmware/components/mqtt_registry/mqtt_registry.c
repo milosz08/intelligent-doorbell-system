@@ -17,6 +17,7 @@ esp_err_t mqtt_registry_init(void)
   esp_err_t err;
 
   err = mqtt_bus_register_topic(MQTT_TOPIC_DOORBELL_MODE_SET, mqtt_handler_doorbell_mode_set);
+  err = mqtt_bus_register_topic(MQTT_TOPIC_DOORBELL_RING, mqtt_handler_doorbell_ring);
   if (err != ESP_OK) return err;
 
   ESP_LOGI(TAG, "all mqtt topics registered successfully");

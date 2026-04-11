@@ -8,6 +8,7 @@ idf_component_register(
     REQUIRES
         app_state
         cyclic_task
+        doorbell_ctrl
         env_sensor
         eth_w5500
         mdns_service

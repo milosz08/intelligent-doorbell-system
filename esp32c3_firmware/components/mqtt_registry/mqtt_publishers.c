@@ -15,7 +15,7 @@ static const char *TAG = "MQTT_PUBLISHERS";
 
 void mqtt_publish_doorbell_ring_event(void)
 {
-    bool success = mqtt_bus_publish(MQTT_TOPIC_DOORBELL_RING, NULL, 1, 0);
+    bool success = mqtt_bus_publish(MQTT_TOPIC_DOORBELL_ON_RING, NULL, 1, 0);
     if (success) ESP_LOGD(TAG, "doorbell ring event published successfully");
     else ESP_LOGE(TAG, "failed to publish doorbell ring event");
 }

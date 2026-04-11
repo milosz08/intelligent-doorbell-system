@@ -15,4 +15,18 @@
  */
 esp_err_t mqtt_handler_doorbell_mode_set(const cJSON *args);
 
+/*! \brief Callback triggered to programmatically ring the doorbell via MQTT.
+ *
+ * Allows remote systems (e.g., Home Assistant, Java Server) to simulate a physical doorbell press by triggering the
+ * chime for a predefined duration.
+ *
+ * Expected JSON payload (args): (empty)
+ *
+ * \param args Parsed JSON parameters.
+ *
+ * \retval ESP_OK               On success.
+ * \retval ESP_ERR_INVALID_ARG  If payload parsing fails.
+ */
+esp_err_t mqtt_handler_doorbell_ring(const cJSON *args);
+
 #endif // MQTT_HANDLERS_H_

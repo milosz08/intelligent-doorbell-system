@@ -10,5 +10,7 @@ idf_component_register(
     REQUIRES
         json
         app_state
+        doorbell_ctrl
         mqtt_bus
+        sys_ind
 )

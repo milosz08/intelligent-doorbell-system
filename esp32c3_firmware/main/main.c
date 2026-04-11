@@ -1,9 +1,11 @@
 #include "app_state.h"
 #include "cyclic_task.h"
+#include "doorbell_ctrl.h"
 #include "env_sensor.h"
 #include "eth_w5500.h"
 #include "mdns_service.h"
 #include "mqtt_bus.h"
+#include "mqtt_publishers.h"
 #include "mqtt_registry.h"
 #include "sys_ind.h"
 
@@ -23,11 +25,15 @@ static const char *TAG = "MAIN";
     } \
 } while(0)
 
-static void on_eth_boot_wait(bool linked)
+static void on_silent_mode_changed(bool is_silent)
 {
-    if (!linked) ESP_LOGW(TAG, "eth not linked");
-    else ESP_LOGI(TAG, "eth linked");
-    sys_ind_led_eth_set_link(linked);
+    doorbell_ctrl_set_silent_mode(is_silent);
+}
+
+static void on_doorbell_pressed(void)
+{
+    sys_ind_status_blink_normal();
+    mqtt_publish_doorbell_ring_event();
 }
 
 // public api ----------------------------------------------------------------------------------------------------------
@@ -44,6 +50,11 @@ void app_main(void)
     // init global state
     CHECK_CRITICAL(app_state_init(), "App state init fail");
 
+    // init doorbell control
+    CHECK_CRITICAL(doorbell_ctrl_init(), "Doorbell ctrl init fail");
+    CHECK_CRITICAL(app_state_register_doorbell_cb(on_silent_mode_changed), "Silent mode handler init fail");
+    doorbell_ctrl_set_callback(on_doorbell_pressed);
+
     // init sensor
     CHECK_CRITICAL(env_sensor_init(), "Env sensor init fail");
 
@@ -57,7 +68,7 @@ void app_main(void)
         .on_packet_received     = sys_ind_led_eth_packet_activity,
     };
     CHECK_CRITICAL(eth_w5500_init(&eth_callbacks), "Ethernet init fail");
-    eth_w5500_force_link_blocking(on_eth_boot_wait);
+    eth_w5500_force_link_blocking(sys_ind_led_eth_set_link);
 
     // init mdns service and wait for IPv4 address
     char broker_uri[64] = {0};
