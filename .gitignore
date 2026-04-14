@@ -10,7 +10,9 @@ relay_server/!.idea/codeStyles/
 relay_server/.bin
 relay_server/.gradle
 relay_server/build/
+relay_server/data/
 relay_server/out/
+relay_server/*.db
 
 .DS_Store
 .env
