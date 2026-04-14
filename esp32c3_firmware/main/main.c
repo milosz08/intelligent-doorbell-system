@@ -82,7 +82,7 @@ void app_main(void)
     // init mqtt bus and registry
     mqtt_bus_config_t mqtt_cfg = {
         .broker_uri = broker_uri,
-        .auth_salt  = "MojaTajnaSol", // TODO: getting from NVM
+        .auth_salt  = "SecretSalt123", // TODO: getting from NVM
     };
     CHECK_CRITICAL(mqtt_bus_init(&mqtt_cfg), "MQTT bus init fail");
     CHECK_CRITICAL(mqtt_registry_init(), "MQTT registry init fail");

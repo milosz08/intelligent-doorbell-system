@@ -1,14 +1,26 @@
 [versions]
+gson = "2.13.2"
 jmdns = "3.6.3"
+junit = "5.10.2"
 logback = "1.5.32"
+mockito = "5.23.0"
 moquette = "0.18.0"
+mqttPaho = "1.2.5"
 shadow = "8.3.0"
 
 [libraries]
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-jupyter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 moquette-broker = { module = "com.github.moquette-io.moquette:moquette-broker", version.ref = "moquette" }
+mqtt-paho = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "mqttPaho" }
 
 [plugins]
+application = { id = "application" }
 java = { id = "java" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
