@@ -10,6 +10,12 @@ plugins {
 group = "pl.miloszgilga"
 version = getEnv("VERSION", "latest")
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
 repositories {
     mavenCentral()
     maven {
