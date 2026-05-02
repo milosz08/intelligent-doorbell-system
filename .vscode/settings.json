@@ -37,5 +37,5 @@
   "workbench.tree.enableStickyScroll": false,
   "workbench.tree.indent": 18,
   "workbench.tree.renderIndentGuides": "always",
-  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
