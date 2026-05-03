@@ -63,6 +63,11 @@ class AppConfig {
         MDNS_SERVICE_DESCRIPTION("mdns-service-description"),
         DB_PATH("db-path"),
         DB_POOL_SIZE("db-pool-size"),
+        SESSION_TTL_SEC("session-ttl-sec"),
+        SESSION_CLEAR_INTERVAL_SEC("session-clear-interval-sec"),
+        ADMIN_USERNAME("admin-username"),
+        ADMIN_PASSWORD_LENGTH("admin-password-length"),
+        ADMIN_PASSWORD_HASH_STRENGTH("admin-password-hash-strength"),
         ;
 
         private final String key;
