@@ -24,10 +24,21 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.bcrypt)
     implementation(libs.gson)
+    implementation(libs.hikari.cp)
+    implementation(libs.jakarta.activation.api)
+    implementation(libs.jetty.servlet)
+    implementation(libs.jetty.ws.server)
+    implementation(libs.jersey.core)
+    implementation(libs.jersey.hk2)
+    implementation(libs.jersey.gson)
     implementation(libs.jmdns)
+    implementation(libs.jul.to.slf4j)
     implementation(libs.logback.classic)
     implementation(libs.moquette.broker)
+    implementation(libs.sqlite.jdbc)
+    implementation(libs.velocity.engine)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform)

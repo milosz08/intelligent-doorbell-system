@@ -1,16 +1,33 @@
 [versions]
+bcrypt = "0.10.2"
 gson = "2.13.2"
+hikariCp = "7.0.2"
+jakartaActivationApi = "2.1.4"
+jetty = "12.1.8"
+jersey = "4.0.0-M2"
 jmdns = "3.6.3"
+julToSlf4j = "2.0.17"
 junit = "5.10.2"
 logback = "1.5.32"
 mockito = "5.23.0"
 moquette = "0.18.0"
 mqttPaho = "1.2.5"
 shadow = "8.3.0"
+sqlite = "3.53.0.0"
+velocity = "2.4.1"
 
 [libraries]
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+hikari-cp = { module = "com.zaxxer:HikariCP", version.ref = "hikariCp" }
+jakarta-activation-api = { module = "jakarta.activation:jakarta.activation-api", version.ref = "jakartaActivationApi" }
+jetty-servlet = { module = "org.eclipse.jetty.ee10:jetty-ee10-servlet", version.ref = "jetty" }
+jetty-ws-server = { module = "org.eclipse.jetty.websocket:jetty-websocket-jetty-server", version.ref = "jetty" }
+jersey-core = { module = "org.glassfish.jersey.containers:jersey-container-servlet-core", version.ref = "jersey" }
+jersey-hk2 = { module = "org.glassfish.jersey.inject:jersey-hk2", version.ref = "jersey" }
+jersey-gson = { module = "org.glassfish.jersey.media:jersey-media-json-gson", version.ref = "jersey" }
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
+jul-to-slf4j = { module = "org.slf4j:jul-to-slf4j", version.ref = "julToSlf4j" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform = { module = "org.junit.platform:junit-platform-launcher" }
@@ -19,6 +36,8 @@ mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-jupyter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 moquette-broker = { module = "com.github.moquette-io.moquette:moquette-broker", version.ref = "moquette" }
 mqtt-paho = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "mqttPaho" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+velocity-engine = { module = "org.apache.velocity:velocity-engine-core", version.ref = "velocity" }
 
 [plugins]
 application = { id = "application" }
