@@ -1,15 +1,26 @@
 package pl.miloszgilga.ids;
 
 import java.io.Closeable;
-import java.io.IOException;
+import java.security.SecureRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Utils {
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+    private static final String ALL_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     private Utils() {
+    }
+
+    public static String generateSecurePassword(int length) {
+        final StringBuilder password = new StringBuilder(length);
+        final SecureRandom secureRandom = new SecureRandom();
+        for (int i = 0; i < length; i++) {
+            final int randomIndex = secureRandom.nextInt(ALL_CHARACTERS.length());
+            password.append(ALL_CHARACTERS.charAt(randomIndex));
+        }
+        return password.toString();
     }
 
     static int safetyParseInt(String value, int defaultValue) {
