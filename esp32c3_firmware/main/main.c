@@ -28,6 +28,7 @@ static const char *TAG = "MAIN";
 static void on_silent_mode_changed(bool is_silent)
 {
     doorbell_ctrl_set_silent_mode(is_silent);
+    mqtt_publish_on_doorbell_mode_set(is_silent);
 }
 
 static void on_doorbell_pressed(void)

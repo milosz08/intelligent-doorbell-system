@@ -1,4 +1,5 @@
 #include "mqtt_handlers.h"
+#include "mqtt_publishers.h"
 #include "app_state.h"
 #include "doorbell_ctrl.h"
 #include "sys_ind.h"
@@ -38,5 +39,6 @@ esp_err_t mqtt_handler_doorbell_ring(const cJSON *args)
     }
     sys_ind_status_blink_normal();
     doorbell_ctrl_trigger_chime();
+    mqtt_publish_on_doorbell_client_ring_event();
     return ESP_OK;
 }
