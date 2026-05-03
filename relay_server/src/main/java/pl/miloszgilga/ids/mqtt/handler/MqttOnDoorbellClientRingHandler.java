@@ -8,21 +8,20 @@ import pl.miloszgilga.ids.mqtt.MqttMessageHandler;
 import pl.miloszgilga.ids.mqtt.topic.MqttAppInboundTopic;
 import pl.miloszgilga.ids.mqtt.topic.MqttInboundTopic;
 
-public class MqttDoorbellOnRingEventHandler implements MqttMessageHandler {
+public class MqttOnDoorbellClientRingHandler implements MqttMessageHandler {
     private final WsSessionRegistry wsSessionRegistry;
 
-    public MqttDoorbellOnRingEventHandler(WsSessionRegistry wsSessionRegistry) {
+    public MqttOnDoorbellClientRingHandler(WsSessionRegistry wsSessionRegistry) {
         this.wsSessionRegistry = wsSessionRegistry;
     }
 
     @Override
     public MqttInboundTopic getTopic() {
-        return MqttAppInboundTopic.DOORBELL_ON_RING;
+        return MqttAppInboundTopic.ON_DOORBELL_RING;
     }
 
     @Override
     public void handle(JsonObject jsonPayload) {
-        // TODO: persist in db
-        wsSessionRegistry.broadcast(AppOpCode.DOORBELL_RING);
+        wsSessionRegistry.broadcast(AppOpCode.DOORBELL_MANUALLY_RING);
     }
 }
