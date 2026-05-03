@@ -1,11 +1,11 @@
 package pl.miloszgilga.ids.mqtt;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,10 +24,11 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
+import pl.miloszgilga.ids.ComponentLifecycle;
 import pl.miloszgilga.ids.CriticalException;
 import pl.miloszgilga.ids.mqtt.topic.MqttOutboundTopic;
 
-public class MqttService implements Closeable {
+public class MqttService implements ComponentLifecycle {
     private static final Logger LOG = LoggerFactory.getLogger(MqttService.class);
 
     private final Server mqttBroker;
@@ -37,21 +38,25 @@ public class MqttService implements Closeable {
     private final MqttEspAuthenticator authenticator;
     private final String brokerClientId;
 
-    public MqttService(List<MqttMessageHandler> messageHandlers, MqttConnectionCallback connectionCallback,
-            String authSalt, int port, String brokerClientId) {
+    private MqttService(Builder builder) {
         mqttBroker = new Server();
         executorService = Executors.newVirtualThreadPerTaskExecutor();
-        brokerConfig = createConfig(port);
-        authenticator = new MqttEspAuthenticator(authSalt);
+        brokerConfig = createConfig(builder.port);
+        authenticator = new MqttEspAuthenticator(builder.authSalt);
         eventInterceptor = new MqttPublishHandler(
-                messageHandlers,
+                builder.messageHandlers,
                 executorService,
-                connectionCallback);
-        this.brokerClientId = brokerClientId;
-        LOG.info("MqttService initialized with {} message handlers", messageHandlers.size());
+                builder.connectionCallback);
+        brokerClientId = builder.brokerClientId;
+        LOG.info("MqttService initialized with {} message handlers", builder.messageHandlers.size());
     }
 
-    public void start() {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Override
+    public void init() {
         LOG.info("Starting MQTT broker on port {}...", brokerConfig.getProperty("port"));
         try {
             mqttBroker.startServer(
@@ -60,7 +65,7 @@ public class MqttService implements Closeable {
                     null,
                     authenticator,
                     null);
-            LOG.info("MQTT broker is up and running.");
+            LOG.info("MQTT broker is up and running");
         } catch (IOException ex) {
             throw new CriticalException(ex.getMessage(), ex);
         }
@@ -102,5 +107,42 @@ public class MqttService implements Closeable {
         props.setProperty("host", "0.0.0.0");
         props.setProperty("allow_anonymous", "false");
         return new MemoryConfig(props);
+    }
+
+    public static class Builder {
+        private int port;
+        private String brokerClientId;
+        private String authSalt;
+        private MqttConnectionCallback connectionCallback;
+        private final Set<MqttMessageHandler> messageHandlers = new HashSet<>();
+
+        public Builder port(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder brokerClientId(String brokerClientId) {
+            this.brokerClientId = brokerClientId;
+            return this;
+        }
+
+        public Builder authSalt(String authSalt) {
+            this.authSalt = authSalt;
+            return this;
+        }
+
+        public Builder connectionCallback(MqttConnectionCallback connectionCallback) {
+            this.connectionCallback = connectionCallback;
+            return this;
+        }
+
+        public Builder addMessageHandler(MqttMessageHandler messageHandler) {
+            messageHandlers.add(messageHandler);
+            return this;
+        }
+
+        public MqttService build() {
+            return new MqttService(this);
+        }
     }
 }

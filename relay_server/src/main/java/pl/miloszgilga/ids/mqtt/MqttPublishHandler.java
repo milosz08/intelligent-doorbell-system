@@ -2,8 +2,8 @@ package pl.miloszgilga.ids.mqtt;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ class MqttPublishHandler extends AbstractInterceptHandler {
     private final Map<String, MqttMessageHandler> routes = new HashMap<>();
     private final MqttConnectionCallback connectionCallback;
 
-    MqttPublishHandler(List<MqttMessageHandler> handlers, ExecutorService executorService,
+    MqttPublishHandler(Set<MqttMessageHandler> handlers, ExecutorService executorService,
             MqttConnectionCallback connectionCallback) {
         for (final MqttMessageHandler handler : handlers) {
             final String path = handler.getTopic().getPath();

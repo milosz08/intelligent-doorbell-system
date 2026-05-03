@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -36,13 +35,13 @@ class MqttServiceIntegrationTest {
     void startBroker() throws Exception {
         latch = new CountDownLatch(1);
         testHandler = new MqttTestHandler(latch);
-        mqttService = new MqttService(
-                List.of(testHandler),
-                null,
-                TEST_SALT,
-                TEST_PORT,
-                "TestBroker");
-        mqttService.start();
+        mqttService = MqttService.builder()
+                .port(TEST_PORT)
+                .brokerClientId("TestBroker")
+                .authSalt(TEST_SALT)
+                .addMessageHandler(testHandler)
+                .build();
+        mqttService.init();
     }
 
     @AfterEach

@@ -1,6 +1,5 @@
 package pl.miloszgilga.ids.net;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -11,9 +10,10 @@ import javax.jmdns.ServiceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pl.miloszgilga.ids.ComponentLifecycle;
 import pl.miloszgilga.ids.CriticalException;
 
-public class MdnsService implements Closeable {
+public class MdnsService implements ComponentLifecycle {
     private static final Logger LOG = LoggerFactory.getLogger(MdnsService.class);
 
     private static final String SERVICE_TYPE = "_mqtt._tcp.local.";
@@ -26,13 +26,18 @@ public class MdnsService implements Closeable {
 
     private JmDNS jmdns;
 
-    public MdnsService(InetAddress address, int port, String serviceName, String serviceDescription) {
-        this.address = address;
-        this.port = port;
-        this.serviceName = serviceName;
-        this.serviceDescription = serviceDescription;
+    private MdnsService(Builder builder) {
+        address = builder.address;
+        port = builder.port;
+        serviceName = builder.serviceName;
+        serviceDescription = builder.serviceDescription;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Override
     public void init() {
         try {
             LOG.info("Initializing mDNS on IP address: {}", address.getHostAddress());
@@ -72,5 +77,36 @@ public class MdnsService implements Closeable {
         jmdns.unregisterAllServices();
         jmdns.close();
         LOG.info("mDNS service was successfully closed");
+    }
+
+    public static class Builder {
+        private InetAddress address;
+        private int port;
+        private String serviceName;
+        private String serviceDescription;
+
+        public Builder address(InetAddress address) {
+            this.address = address;
+            return this;
+        }
+
+        public Builder port(int port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder serviceName(String serviceName) {
+            this.serviceName = serviceName;
+            return this;
+        }
+
+        public Builder serviceDescription(String serviceDescription) {
+            this.serviceDescription = serviceDescription;
+            return this;
+        }
+
+        public MdnsService build() {
+            return new MdnsService(this);
+        }
     }
 }
