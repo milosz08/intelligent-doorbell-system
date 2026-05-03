@@ -28,14 +28,18 @@ public class Utils {
         }
     }
 
-    public static <T> void closeQuietly(Closeable closeable) {
-        if (closeable == null) {
+    public static void closeQuietly(ThrowingRunnable throwingRunnable) {
+        if (throwingRunnable == null) {
             return;
         }
         try {
-            closeable.close();
-        } catch (IOException ex) {
+            throwingRunnable.run();
+        } catch (Exception ex) {
             LOG.error("Unable to close resource, cause: " + ex.getMessage(), ex);
         }
+    }
+
+    public static void closeQuietly(Closeable closeable) {
+        closeQuietly((ThrowingRunnable) () -> closeable.close());
     }
 }
