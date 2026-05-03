@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login - IDS relay server</title>
+        <link rel="stylesheet" type="text/css" href="/static/style.css">
+    </head>
+    <body>
+        <h2>Login to IDS relay server</h2>
+        #if($errorMessage)
+            <p class="error-text">$errorMessage</p>
+        #end
+        <form method="POST">
+            <table>
+                <tr>
+                    <td>
+                        <label for="username">Username:</label>
+                    </td>
+                    <td>
+                        <input type="text" id="username" name="username" required="required" value="$!previousUsername">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="password">Password:</label>
+                    </td>
+                    <td>
+                        <input type="password" id="password" name="password" required="required">
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <button type="submit">Login</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </body>
+</html>
