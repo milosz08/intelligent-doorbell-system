@@ -37,10 +37,10 @@ static esp_err_t resolve_mqtt_broker(char *out_uri, size_t max_len, uint32_t tim
     {
         if (a->addr.type == ESP_IPADDR_TYPE_V4)
         {
-        snprintf(out_uri, max_len, "mqtt://" IPSTR ":%d", IP2STR(&a->addr.u_addr.ip4), results->port);
-        ESP_LOGI(TAG, "resolved broker uri: %s", out_uri);
-        ret = ESP_OK;
-        break;
+            snprintf(out_uri, max_len, "mqtt://" IPSTR ":%d", IP2STR(&a->addr.u_addr.ip4), results->port);
+            ESP_LOGI(TAG, "resolved broker uri: %s", out_uri);
+            ret = ESP_OK;
+            break;
         }
         a = a->next;
     }
