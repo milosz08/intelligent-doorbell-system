@@ -85,6 +85,9 @@ public class MdnsService implements ComponentLifecycle {
         private String serviceName;
         private String serviceDescription;
 
+        private Builder() {
+        }
+
         public Builder address(InetAddress address) {
             this.address = address;
             return this;

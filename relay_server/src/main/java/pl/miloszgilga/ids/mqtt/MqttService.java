@@ -116,6 +116,9 @@ public class MqttService implements ComponentLifecycle {
         private MqttConnectionCallback connectionCallback;
         private final Set<MqttMessageHandler> messageHandlers = new HashSet<>();
 
+        private Builder() {
+        }
+
         public Builder port(int port) {
             this.port = port;
             return this;
