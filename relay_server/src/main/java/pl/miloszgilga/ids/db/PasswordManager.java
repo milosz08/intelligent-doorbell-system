@@ -1,13 +1,17 @@
 package pl.miloszgilga.ids.db;
 
-import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import pl.miloszgilga.ids.ContentInitializer;
 import pl.miloszgilga.ids.Utils;
 import pl.miloszgilga.ids.db.dao.UserDao;
+import pl.miloszgilga.ids.security.Permission;
 
 public class PasswordManager implements ContentInitializer {
+    private static final Logger LOG = LoggerFactory.getLogger(PasswordManager.class);
+
     private final UserDao userDao;
     private final String username;
     private final int passwordLength;
@@ -28,25 +32,31 @@ public class PasswordManager implements ContentInitializer {
     public void init() {
         final Boolean userExists = userDao.userExists(username);
         if (userExists == null) {
+            LOG.error("Failed to check if admin user exists (returned null)");
             return;
         }
         if (!userExists) {
-            userDao.deleteUsers(Role.ADMIN);
+            LOG.debug("Admin user '{}' does not exist, creating default setup", username);
+            userDao.deleteUsers(Permission.ADMIN.getBit());
 
             final String password = Utils.generateSecurePassword(passwordLength);
             final String passwordHash = hash(password);
 
-            userDao.createUser(username, passwordHash, Role.ADMIN);
+            userDao.createUser(username, passwordHash, Permission.ADMIN.getBit());
             printLoginDetails(password);
             return;
         }
+        LOG.debug("Admin user '{}' exists, checking if default password is in use", username);
         final Boolean hasDefaultPassword = userDao.userHasDefaultPassword(username);
         if (hasDefaultPassword == null) {
+            LOG.error("Failed to check default password status (returned null)");
             return;
         }
         if (!hasDefaultPassword) {
+            LOG.debug("Admin user is NOT using a default password, setup skipped");
             return;
         }
+        LOG.debug("Admin user is using default password, regenerating");
         final String password = Utils.generateSecurePassword(passwordLength);
         userDao.updateUserPassword(username, hash(password), true);
         printLoginDetails(password);
@@ -62,10 +72,12 @@ public class PasswordManager implements ContentInitializer {
         }
         final String passwordHash = userDao.getUserPasswordHash(username);
         if (passwordHash == null) {
+            LOG.debug("Verification failed: password hash not found in DB for user '{}'", username);
             return false;
         }
         final BCrypt.Result result = BCrypt.verifyer().verify(incomingPassword.toCharArray(),
                 passwordHash.toCharArray());
+        LOG.debug("Verification result for user '{}': {}", username, result.verified);
         return result.verified;
     }
 

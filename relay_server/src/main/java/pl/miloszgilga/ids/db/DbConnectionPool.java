@@ -21,6 +21,7 @@ public class DbConnectionPool implements ComponentLifecycle {
     private HikariDataSource dataSource;
 
     private DbConnectionPool(Builder builder) {
+        LOG.debug("Configuring database connection pool for DB: {}", builder.dbName);
         createMissingDir(builder.dbName);
         config = new HikariConfig();
         config.setJdbcUrl("jdbc:sqlite:" + builder.dbName);
@@ -28,6 +29,7 @@ public class DbConnectionPool implements ComponentLifecycle {
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         config.setMaximumPoolSize(builder.maximumPoolSize);
+        LOG.debug("Max pool size set to: {}", builder.maximumPoolSize);
     }
 
     @Override
@@ -43,9 +45,14 @@ public class DbConnectionPool implements ComponentLifecycle {
         final File dbFile = new File(dbName);
         final File parentDir = dbFile.getParentFile();
         if (parentDir != null && !parentDir.exists()) {
+            LOG.debug("Directory {} does not exist, attempting to create...", parentDir.getPath());
             if (parentDir.mkdirs()) {
                 LOG.info("Created missing directory structure: {}", parentDir.getPath());
+            } else {
+                LOG.error("Failed to create directory structure: {}", parentDir.getPath());
             }
+        } else if (parentDir != null) {
+            LOG.debug("Directory {} already exists", parentDir.getPath());
         }
     }
 
