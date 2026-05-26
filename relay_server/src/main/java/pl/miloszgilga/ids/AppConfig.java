@@ -53,10 +53,15 @@ class AppConfig {
         return Utils.safetyParseInt(resolveProperty(prop), 0);
     }
 
+    boolean getAsBoolean(AppConfig.Prop prop) {
+        return resolveProperty(prop).equals("true");
+    }
+
     // prop.name() -> key to environment path (ex. HTTP_PORT)
     // prop.key -> key to property in properties file (ex. http-port)
     enum Prop {
         HTTP_PORT("http-port"),
+        ENABLE_HTML_TEMPLATES_CACHING("enable-html-templates-caching"),
         MQTT_PORT("mqtt-port"),
         MQTT_SALT("mqtt-salt"),
         MDNS_SERVICE_NAME("mdns-service-name"),

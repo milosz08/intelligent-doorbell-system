@@ -14,7 +14,7 @@ moquette = "0.18.0"
 mqttPaho = "1.2.5"
 shadow = "8.3.0"
 sqlite = "3.53.0.0"
-velocity = "2.4.1"
+thymeleaf = "3.1.5.RELEASE"
 
 [libraries]
 bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
@@ -37,7 +37,7 @@ mockito-jupyter = { module = "org.mockito:mockito-junit-jupiter", version.ref = 
 moquette-broker = { module = "com.github.moquette-io.moquette:moquette-broker", version.ref = "moquette" }
 mqtt-paho = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "mqttPaho" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
-velocity-engine = { module = "org.apache.velocity:velocity-engine-core", version.ref = "velocity" }
+thymeleaf = { module = "org.thymeleaf:thymeleaf", version.ref = "thymeleaf" }
 
 [plugins]
 application = { id = "application" }

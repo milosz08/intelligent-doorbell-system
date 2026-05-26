@@ -15,7 +15,7 @@ import pl.miloszgilga.ids.http.GlobalExceptionMapper;
 import pl.miloszgilga.ids.http.HttpService;
 import pl.miloszgilga.ids.http.api.AuthFilter;
 import pl.miloszgilga.ids.http.api.AuthResource;
-import pl.miloszgilga.ids.http.html.AuthViewFilter;
+import pl.miloszgilga.ids.http.template.HtmlTemplateEngine;
 import pl.miloszgilga.ids.http.html.DashboardViewResource;
 import pl.miloszgilga.ids.http.html.GuestViewFilter;
 import pl.miloszgilga.ids.http.html.LoginViewResource;
@@ -99,7 +99,8 @@ class RelayServerApplication implements Runnable {
                     .build();
             mdnsService.init();
 
-            final TemplateEngine templateEngine = new TemplateEngine();
+            final HtmlTemplateEngine templateEngine = new HtmlTemplateEngine(
+                    appConfig.getAsBoolean(AppConfig.Prop.ENABLE_HTML_TEMPLATES_CACHING));
             templateEngine.init();
 
             httpService = HttpService.builder()

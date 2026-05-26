@@ -1,8 +1,8 @@
 package pl.miloszgilga.ids.http.template;
 
 public enum AppHtmlView implements HtmlView {
-    DASHBOARD("template/dashboard.vm"),
-    LOGIN("template/login.vm"),
+    DASHBOARD("template/dashboard.html"),
+    LOGIN("template/login.html"),
     ;
 
     private final String path;

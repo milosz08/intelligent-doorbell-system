@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{template/layout.html :: baseLayout('Dashboard - IDS Server', ~{:: main}, ~{:: #dashboard-scripts})}">
+
+<body>
+    <main>
+        <h2>IDS dashboard</h2>
+        Logged as:
+        <b th:text="${user.username}"></b>
+        (permissions mask: <span th:text="${user.permissionsMask}"></span>)
+        <form action="/logout" method="POST">
+            <button type="submit" class="btn btn-primary btn-sm">Logout</button>
+        </form>
+    </main>
+    <th:block id="dashboard-scripts">
+        <script src="/static/dashboard.js"></script>
+    </th:block>
+</body>
+
+</html>
