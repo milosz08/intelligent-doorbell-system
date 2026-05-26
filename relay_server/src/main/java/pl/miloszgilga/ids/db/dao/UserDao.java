@@ -3,7 +3,6 @@ package pl.miloszgilga.ids.db.dao;
 import java.util.List;
 
 import pl.miloszgilga.ids.ContentInitializer;
-import pl.miloszgilga.ids.db.Role;
 import pl.miloszgilga.ids.db.dto.UserDetails;
 
 public interface UserDao extends ContentInitializer {
@@ -15,11 +14,15 @@ public interface UserDao extends ContentInitializer {
 
     Boolean userExists(String username);
 
-    void createUser(String username, String hashedDefaultPassword, Role role);
+    void createUser(String username, String hashedDefaultPassword, long permissionsMask);
 
     boolean updateUserPassword(String username, String newHashedPassword, boolean defaultPassword);
 
     Boolean userHasDefaultPassword(String username);
 
-    void deleteUsers(Role role);
+    boolean grantPermission(String username, long permissionBit);
+
+    boolean revokePermission(String username, long permissionBit);
+
+    void deleteUsers(long permissionsMask);
 }

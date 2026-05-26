@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pl.miloszgilga.ids.db.dto.UserDetails;
+import pl.miloszgilga.ids.security.Permission;
+import pl.miloszgilga.ids.security.PermissionManager;
 
 public class WsListener implements Session.Listener.AutoDemanding {
     private static final Logger LOG = LoggerFactory.getLogger(WsListener.class);
@@ -15,27 +17,31 @@ public class WsListener implements Session.Listener.AutoDemanding {
     private final UserDetails userDetails;
     private final WsRouter wsRouter;
     private final WsSessionRegistry wsSessionRegistry;
+    private final PermissionManager<Permission> permissionManager;
 
     private String currentSessionId;
 
-    public WsListener(UserDetails userDetails, WsRouter wsRouter, WsSessionRegistry wsSessionRegistry) {
+    public WsListener(UserDetails userDetails, WsRouter wsRouter, WsSessionRegistry wsSessionRegistry,
+            PermissionManager<Permission> permissionManager) {
         this.userDetails = userDetails;
         this.wsRouter = wsRouter;
         this.wsSessionRegistry = wsSessionRegistry;
+        this.permissionManager = permissionManager;
     }
 
     @Override
     public void onWebSocketOpen(Session session) {
         currentSessionId = UUID.randomUUID().toString();
         wsSessionRegistry.register(currentSessionId, session, userDetails);
-        LOG.info("New client connected, session ID: {}, role: {}, active clients: {}", currentSessionId,
-                userDetails.role(), wsSessionRegistry.getSize());
+        LOG.info("New client connected, session ID: {}, permissions: {}, active clients: {}", currentSessionId,
+                permissionManager.getActivePermissionsAsStrings(userDetails.permissionsMask()),
+                wsSessionRegistry.getSize());
     }
 
     @Override
     public void onWebSocketClose(int statusCode, String reason, Callback callback) {
         LOG.info("Client disconnected: {}, reason: {}, active clients: {}", getSafeSessionId(), reason,
-                wsSessionRegistry.getSize());
+                wsSessionRegistry.getSize() - 1);
         if (currentSessionId != null) {
             wsSessionRegistry.unregister(currentSessionId);
         }

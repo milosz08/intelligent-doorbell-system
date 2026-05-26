@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pl.miloszgilga.ids.db.DbConnectionPool;
-import pl.miloszgilga.ids.db.Role;
 import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dto.UserDetails;
 
@@ -57,7 +56,7 @@ public class JdbcSessionDao implements SessionDao {
             ps.setInt(3, userId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                LOG.info("Created session for user: {} with session id: {}", userId, sessionId);
+                LOG.info("Created session successfully for user ID: {}", userId);
             }
         } catch (SQLException ex) {
             LOG.error("Unable to create session for user: {}, cause: {}", userId, ex.getMessage());
@@ -68,7 +67,7 @@ public class JdbcSessionDao implements SessionDao {
     public UserDetails getSession(String sessionId) {
         final Instant now = Instant.now();
         final String sql = String.format("""
-                SELECT userId, username, role FROM `%s` s
+                SELECT userId, username, permissionsMask FROM `%s` s
                 INNER JOIN `%s` u ON s.userId = u.id WHERE sessionId = ? AND expiredAtUtc >= ?;
                 """, TABLE_NAME, JdbcUserDao.TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
@@ -77,7 +76,10 @@ public class JdbcSessionDao implements SessionDao {
             ps.setTimestamp(2, Timestamp.from(now));
             try (final ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new UserDetails(rs.getInt(1), rs.getString(2), Role.valueOf(rs.getString(3)));
+                    final UserDetails user = new UserDetails(rs.getInt(1), rs.getString(2), rs.getLong(3));
+                    LOG.debug("Session is VALID, user: '{}', permissions mask: {}", user.username(),
+                            user.permissionsMask());
+                    return user;
                 }
             }
         } catch (SQLException ex) {
@@ -97,9 +99,11 @@ public class JdbcSessionDao implements SessionDao {
             ps.setString(2, sessionId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                LOG.debug("Updated session time with session id: {}", sessionId);
+                LOG.debug("Successfully extended session time for ID: {}", sessionId);
+                return true;
+            } else {
+                LOG.debug("Failed to extend session time, session ID: {} might not exist", sessionId);
             }
-            return true;
         } catch (SQLException ex) {
             LOG.error("Unable to update session time for session with id: {}, cause: {}", sessionId,
                     ex.getMessage());
@@ -115,11 +119,12 @@ public class JdbcSessionDao implements SessionDao {
             ps.setString(1, sessionId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                LOG.info("Destroy session with session id: {}", sessionId);
+                LOG.info("Destroyed session with ID: {}", sessionId);
+            } else {
+                LOG.debug("Session destroy skipped - session ID: {} was not found.", sessionId);
             }
         } catch (SQLException ex) {
-            LOG.error("Unable to destroy session with session id: {}. Cause: {}", sessionId,
-                    ex.getMessage());
+            LOG.error("Unable to destroy session with session id: {}, cause: {}", sessionId, ex.getMessage());
         }
     }
 
@@ -128,8 +133,14 @@ public class JdbcSessionDao implements SessionDao {
         final String sql = String.format("DELETE FROM `%s` WHERE expiredAtUtc < ?;", TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.executeUpdate();
-        } catch (SQLException ignored) {
+            final int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                LOG.info("Cleanup completed, removed {} expired session(s)", affectedRows);
+            } else {
+                LOG.debug("Cleanup completed, no expired sessions found.");
+            }
+        } catch (SQLException ex) {
+            LOG.error("Failed to execute cleanup for expired sessions, cause: {}", ex.getMessage());
         }
     }
 }

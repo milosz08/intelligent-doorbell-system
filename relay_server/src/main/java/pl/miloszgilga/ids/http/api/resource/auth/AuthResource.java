@@ -1,4 +1,4 @@
-package pl.miloszgilga.ids.http.api;
+package pl.miloszgilga.ids.http.api.resource.auth;
 
 import java.time.Instant;
 
@@ -15,6 +15,7 @@ import pl.miloszgilga.ids.db.PasswordManager;
 import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dao.UserDao;
 import pl.miloszgilga.ids.http.Constants;
+import pl.miloszgilga.ids.http.api.auth.ApiAuthenticated;
 
 @Path("/api/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -50,7 +51,7 @@ public class AuthResource {
         return Response.ok(new LoginResponse(Constants.SID_HEADER_NAME, sessionToken)).build();
     }
 
-    @Authenticated
+    @ApiAuthenticated
     @DELETE
     @Path("/logout")
     public Response logout(@Context ContainerRequestContext crc) {

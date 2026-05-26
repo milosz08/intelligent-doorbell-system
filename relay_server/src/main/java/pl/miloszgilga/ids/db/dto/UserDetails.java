@@ -1,6 +1,4 @@
 package pl.miloszgilga.ids.db.dto;
 
-import pl.miloszgilga.ids.db.Role;
-
-public record UserDetails(Integer id, String username, Role role) {
+public record UserDetails(Integer id, String username, long permissionsMask) {
 }

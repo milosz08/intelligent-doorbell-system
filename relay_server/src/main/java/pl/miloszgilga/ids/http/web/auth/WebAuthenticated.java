@@ -1,4 +1,4 @@
-package pl.miloszgilga.ids.http.api;
+package pl.miloszgilga.ids.http.web.auth;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,5 +10,5 @@ import jakarta.ws.rs.NameBinding;
 @NameBinding
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
-@interface Authenticated {
+public @interface WebAuthenticated {
 }

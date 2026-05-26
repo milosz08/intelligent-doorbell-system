@@ -1,7 +1,7 @@
 package pl.miloszgilga.ids.http.ws;
 
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,17 +16,23 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 
-import pl.miloszgilga.ids.db.Role;
 import pl.miloszgilga.ids.db.dto.UserDetails;
 import pl.miloszgilga.ids.http.ws.op.OpCode;
+import pl.miloszgilga.ids.security.Permission;
+import pl.miloszgilga.ids.security.PermissionManager;
 
 public class WsSessionRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(WsSessionRegistry.class);
 
     private final Map<String, WsSessionData> sessions = new ConcurrentHashMap<>();
+    private final PermissionManager<Permission> permissionManager;
 
     private final Gson gson = new Gson();
     private final ExecutorService virtualExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
+    public WsSessionRegistry(PermissionManager<Permission> permissionManager) {
+        this.permissionManager = permissionManager;
+    }
 
     public void register(String sessionId, Session session, UserDetails userDetails) {
         sessions.put(sessionId, new WsSessionData(sessionId, session, userDetails));
@@ -56,18 +62,21 @@ public class WsSessionRegistry {
         sendTo(sessionId, op, null);
     }
 
-    public void broadcast(OpCode op, Object data, Set<Role> roles) {
+    public void broadcast(OpCode op, Object data, Permission... requiredPermissions) {
         if (sessions.isEmpty()) {
             LOG.debug("Broadcast skipped: no active sessions for op: {}", op.toString());
             return;
         }
         final WsMessage message = createWsMessage(op, data);
         final String payload = gson.toJson(message);
-        LOG.debug("Broadcasting op: {} to {} active clients", message.op(), getSize());
+        LOG.debug("Broadcasting op: {} (with data: {}) to {} active clients (required permissions: {})",
+                message.op(), data, getSize(), Arrays.asList(requiredPermissions));
 
         for (final WsSessionData sessionData : sessions.values()) {
             final Session session = sessionData.session();
-            if (session.isOpen() && (roles == null || roles.contains(sessionData.user().role()))) {
+            final boolean hasAccess = (requiredPermissions == null || requiredPermissions.length == 0) ||
+                    permissionManager.hasAnyPermission(sessionData.user().permissionsMask(), requiredPermissions);
+            if (session.isOpen() && hasAccess) {
                 virtualExecutor.submit(() -> {
                     try {
                         await(callback -> session.sendText(payload, callback));
@@ -81,15 +90,15 @@ public class WsSessionRegistry {
     }
 
     public void broadcast(OpCode op, Object data) {
-        broadcast(op, data, null);
+        broadcast(op, data, (Permission[]) null);
     }
 
     public void broadcast(OpCode op) {
-        broadcast(op, null, null);
+        broadcast(op, null, (Permission[]) null);
     }
 
-    public void broadcast(OpCode op, Set<Role> roles) {
-        broadcast(op, null, roles);
+    public void broadcast(OpCode op, Permission... requiredPermissions) {
+        broadcast(op, null, requiredPermissions);
     }
 
     public int getSize() {

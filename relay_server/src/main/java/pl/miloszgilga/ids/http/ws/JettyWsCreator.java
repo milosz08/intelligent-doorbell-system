@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dto.UserDetails;
 import pl.miloszgilga.ids.http.Constants;
+import pl.miloszgilga.ids.security.Permission;
+import pl.miloszgilga.ids.security.PermissionManager;
 
 public class JettyWsCreator implements WebSocketCreator {
     private static final Logger LOG = LoggerFactory.getLogger(JettyWsCreator.class);
@@ -25,11 +27,14 @@ public class JettyWsCreator implements WebSocketCreator {
     private final SessionDao sessionDao;
     private final WsRouter wsRouter;
     private final WsSessionRegistry wsSessionRegistry;
+    private final PermissionManager<Permission> permissionManager;
 
-    public JettyWsCreator(SessionDao sessionDao, WsRouter wsRouter, WsSessionRegistry wsSessionRegistry) {
+    public JettyWsCreator(SessionDao sessionDao, WsRouter wsRouter, WsSessionRegistry wsSessionRegistry,
+            PermissionManager<Permission> permissionManager) {
         this.sessionDao = sessionDao;
         this.wsRouter = wsRouter;
         this.wsSessionRegistry = wsSessionRegistry;
+        this.permissionManager = permissionManager;
     }
 
     @Override
@@ -59,9 +64,13 @@ public class JettyWsCreator implements WebSocketCreator {
             if (userDetails == null) {
                 throw new LoginException("session not exists");
             }
-            LOG.debug("Authentication successful for user: {} (role: {})", userDetails.username(),
-                    userDetails.role());
-            return new WsListener(userDetails, wsRouter, wsSessionRegistry);
+            if (LOG.isDebugEnabled()) {
+                final List<String> activePerms = permissionManager
+                        .getActivePermissionsAsStrings(userDetails.permissionsMask());
+                LOG.debug("Authentication successful for user: {} (permissions: {})", userDetails.username(),
+                        activePerms);
+            }
+            return new WsListener(userDetails, wsRouter, wsSessionRegistry, permissionManager);
         } catch (LoginException ex) {
             LOG.error("Unable to authenticate to WS, cause: {}", ex.getMessage());
             response.setStatus(HttpStatus.UNAUTHORIZED_401);

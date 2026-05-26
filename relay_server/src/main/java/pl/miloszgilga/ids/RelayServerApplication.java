@@ -13,14 +13,14 @@ import pl.miloszgilga.ids.db.jdbc.JdbcSessionDao;
 import pl.miloszgilga.ids.db.jdbc.JdbcUserDao;
 import pl.miloszgilga.ids.http.GlobalExceptionMapper;
 import pl.miloszgilga.ids.http.HttpService;
-import pl.miloszgilga.ids.http.api.AuthFilter;
-import pl.miloszgilga.ids.http.api.AuthResource;
+import pl.miloszgilga.ids.http.api.auth.ApiAuthFilter;
+import pl.miloszgilga.ids.http.api.resource.auth.AuthResource;
 import pl.miloszgilga.ids.http.template.HtmlTemplateEngine;
-import pl.miloszgilga.ids.http.html.DashboardViewResource;
-import pl.miloszgilga.ids.http.html.GuestViewFilter;
-import pl.miloszgilga.ids.http.html.LoginViewResource;
-import pl.miloszgilga.ids.http.html.SessionRefreshViewResponseFilter;
-import pl.miloszgilga.ids.http.template.TemplateEngine;
+import pl.miloszgilga.ids.http.web.auth.GuestViewFilter;
+import pl.miloszgilga.ids.http.web.auth.SessionRefreshViewResponseFilter;
+import pl.miloszgilga.ids.http.web.auth.WebAuthFilter;
+import pl.miloszgilga.ids.http.web.resource.dashboard.DashboardViewResource;
+import pl.miloszgilga.ids.http.web.resource.login.LoginViewResource;
 import pl.miloszgilga.ids.http.ws.WsSessionRegistry;
 import pl.miloszgilga.ids.http.ws.handler.DoorbellModeSetHandler;
 import pl.miloszgilga.ids.http.ws.handler.DoorbellRingHandler;
@@ -33,6 +33,8 @@ import pl.miloszgilga.ids.mqtt.handler.MqttOnDoorbellClientRingHandler;
 import pl.miloszgilga.ids.mqtt.handler.MqttOnDoorbellModeSetHandler;
 import pl.miloszgilga.ids.net.MdnsService;
 import pl.miloszgilga.ids.net.NetworkProvider;
+import pl.miloszgilga.ids.security.Permission;
+import pl.miloszgilga.ids.security.PermissionManager;
 
 class RelayServerApplication implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(RelayServerApplication.class);
@@ -77,7 +79,9 @@ class RelayServerApplication implements Runnable {
                     .build();
             expiredSessionRemoval.init();
 
-            final WsSessionRegistry wsSessionRegistry = new WsSessionRegistry();
+            final PermissionManager<Permission> permissionManager = new PermissionManager<>(
+                    Permission.values());
+            final WsSessionRegistry wsSessionRegistry = new WsSessionRegistry(permissionManager);
 
             mqttService = MqttService.builder()
                     .port(appConfig.getAsInt(AppConfig.Prop.MQTT_PORT))
@@ -107,13 +111,14 @@ class RelayServerApplication implements Runnable {
                     .port(appConfig.getAsInt(AppConfig.Prop.HTTP_PORT))
                     .sessionDao(sessionDao)
                     .wsSessionRegistry(wsSessionRegistry)
+                    .permissionManager(permissionManager)
                     // api
                     .addResource(new AuthResource(
                             passwordManager,
                             userDao,
                             sessionDao,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
-                    .addResource(new AuthFilter(sessionDao,
+                    .addResource(new ApiAuthFilter(sessionDao, permissionManager,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
                     .addResource(new GlobalExceptionMapper())
                     // html views
@@ -124,7 +129,7 @@ class RelayServerApplication implements Runnable {
                             sessionDao,
                             passwordManager,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
-                    .addResource(new AuthViewFilter(sessionDao,
+                    .addResource(new WebAuthFilter(sessionDao, permissionManager,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
                     .addResource(new GuestViewFilter())
                     .addResource(new SessionRefreshViewResponseFilter())

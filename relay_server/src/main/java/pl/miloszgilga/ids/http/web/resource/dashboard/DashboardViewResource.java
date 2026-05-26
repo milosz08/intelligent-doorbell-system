@@ -1,4 +1,4 @@
-package pl.miloszgilga.ids.http.html;
+package pl.miloszgilga.ids.http.web.resource.dashboard;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -18,16 +18,17 @@ import pl.miloszgilga.ids.db.dao.UserDao;
 import pl.miloszgilga.ids.db.dto.UserDetails;
 import pl.miloszgilga.ids.http.Constants;
 import pl.miloszgilga.ids.http.template.AppHtmlView;
-import pl.miloszgilga.ids.http.template.TemplateEngine;
+import pl.miloszgilga.ids.http.template.HtmlTemplateEngine;
+import pl.miloszgilga.ids.http.web.auth.WebAuthenticated;
 
-@ViewAuthenticated
+@WebAuthenticated
 @Path("/")
 public class DashboardViewResource {
-    private final TemplateEngine templateEngine;
+    private final HtmlTemplateEngine templateEngine;
     private final UserDao userDao;
     private final SessionDao sessionDao;
 
-    public DashboardViewResource(TemplateEngine templateEngine, UserDao userDao, SessionDao sessionDao) {
+    public DashboardViewResource(HtmlTemplateEngine templateEngine, UserDao userDao, SessionDao sessionDao) {
         this.templateEngine = templateEngine;
         this.userDao = userDao;
         this.sessionDao = sessionDao;

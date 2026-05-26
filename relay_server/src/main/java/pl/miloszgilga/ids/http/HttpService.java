@@ -28,6 +28,8 @@ import pl.miloszgilga.ids.http.ws.JettyWsCreator;
 import pl.miloszgilga.ids.http.ws.WsRouter;
 import pl.miloszgilga.ids.http.ws.WsSessionRegistry;
 import pl.miloszgilga.ids.http.ws.handler.WsMessageHandler;
+import pl.miloszgilga.ids.security.Permission;
+import pl.miloszgilga.ids.security.PermissionManager;
 
 public class HttpService implements ComponentLifecycle {
     private static final Logger LOG = LoggerFactory.getLogger(HttpService.class);
@@ -36,6 +38,7 @@ public class HttpService implements ComponentLifecycle {
     private final SessionDao sessionDao;
     private final WsRouter wsRouter;
     private final WsSessionRegistry wsSessionRegistry;
+    private final PermissionManager<Permission> permissionManager;
     private final Set<Object> resources;
 
     private Server server;
@@ -45,6 +48,7 @@ public class HttpService implements ComponentLifecycle {
         port = builder.port;
         sessionDao = builder.sessionDao;
         wsSessionRegistry = builder.wsSessionRegistry;
+        permissionManager = builder.permissionManager;
         wsRouter = builder.wsRouter;
         resources = builder.resources;
     }
@@ -88,7 +92,8 @@ public class HttpService implements ComponentLifecycle {
                     container.addMapping("/v1", new JettyWsCreator(
                             sessionDao,
                             wsRouter,
-                            wsSessionRegistry));
+                            wsSessionRegistry,
+                            permissionManager));
                 });
         wsHandler.setHandler(context);
         server.setHandler(wsHandler);
@@ -117,6 +122,7 @@ public class HttpService implements ComponentLifecycle {
         private int port;
         private SessionDao sessionDao;
         private WsSessionRegistry wsSessionRegistry;
+        private PermissionManager<Permission> permissionManager;
         private final WsRouter wsRouter = new WsRouter();
         private final Set<Object> resources = new HashSet<>();
 
@@ -135,6 +141,11 @@ public class HttpService implements ComponentLifecycle {
 
         public Builder wsSessionRegistry(WsSessionRegistry wsSessionRegistry) {
             this.wsSessionRegistry = wsSessionRegistry;
+            return this;
+        }
+
+        public Builder permissionManager(PermissionManager<Permission> permissionManager) {
+            this.permissionManager = permissionManager;
             return this;
         }
 

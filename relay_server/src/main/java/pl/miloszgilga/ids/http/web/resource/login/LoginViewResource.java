@@ -1,4 +1,4 @@
-package pl.miloszgilga.ids.http.html;
+package pl.miloszgilga.ids.http.web.resource.login;
 
 import java.net.URI;
 import java.time.Instant;
@@ -19,18 +19,19 @@ import pl.miloszgilga.ids.db.PasswordManager;
 import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dao.UserDao;
 import pl.miloszgilga.ids.http.template.AppHtmlView;
-import pl.miloszgilga.ids.http.template.TemplateEngine;
+import pl.miloszgilga.ids.http.template.HtmlTemplateEngine;
+import pl.miloszgilga.ids.http.web.auth.PublicViewOnly;
 
 @PublicViewOnly
 @Path("/login")
 public class LoginViewResource {
-    private final TemplateEngine templateEngine;
+    private final HtmlTemplateEngine templateEngine;
     private final UserDao userDao;
     private final SessionDao sessionDao;
     private final PasswordManager passwordManager;
     private final int sessionTtlSec;
 
-    public LoginViewResource(TemplateEngine templateEngine, UserDao userDao, SessionDao sessionDao,
+    public LoginViewResource(HtmlTemplateEngine templateEngine, UserDao userDao, SessionDao sessionDao,
             PasswordManager passwordManager, int sessionTtlSec) {
         this.templateEngine = templateEngine;
         this.userDao = userDao;
