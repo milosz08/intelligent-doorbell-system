@@ -1,0 +1,19 @@
+<configuration>
+    <property name="LOG_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %magenta([%15.15thread]) %cyan(%-40.40logger{39}) : %msg%n"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io.moquette.broker.metrics.MQTTMessageLogger" level="WARN" />
+    <logger name="io.moquette" level="WARN" />
+    <logger name="org.glassfish.jersey.internal.inject.Providers" level="ERROR" />
+    <logger name="pl.miloszgilga" level="DEBUG" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
