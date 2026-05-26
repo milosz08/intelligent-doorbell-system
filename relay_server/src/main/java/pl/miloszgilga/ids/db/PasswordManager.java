@@ -67,9 +67,6 @@ public class PasswordManager implements ContentInitializer {
     }
 
     public boolean verify(String username, String incomingPassword) {
-        if (!Objects.equals(this.username, username)) {
-            return false;
-        }
         final String passwordHash = userDao.getUserPasswordHash(username);
         if (passwordHash == null) {
             LOG.debug("Verification failed: password hash not found in DB for user '{}'", username);
