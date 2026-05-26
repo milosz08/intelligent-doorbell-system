@@ -38,7 +38,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.moquette.broker)
     implementation(libs.sqlite.jdbc)
-    implementation(libs.velocity.engine)
+    implementation(libs.thymeleaf)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform)
@@ -70,6 +70,11 @@ tasks.withType<ShadowJar> {
             mapOf("Main-Class" to "pl.miloszgilga.ids.RelayServerApplication")
         )
     }
+}
+
+tasks.withType<JavaExec> {
+    systemProperty("logback.configurationFile", "src/main/resources/logback-dev.xml")
+    systemProperty("file.encoding", "UTF-8")
 }
 
 fun getEnv(name: String, defValue: String = ""): String {
