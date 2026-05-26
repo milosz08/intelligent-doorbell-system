@@ -52,7 +52,6 @@ class MqttServiceIntegrationTest {
     @Test
     @DisplayName("publish message through network and verify handler logic")
     void shouldRouteAndProcessRealMessage() throws Exception {
-        // arrange
         final String topic = "ids/test/topic";
         final String jsonPayload = "{\"temperature\": 22.5, \"sensor\": \"DHT22\"}";
         final MqttClient client = new MqttClient("tcp://localhost:" + TEST_PORT, "PahoTestClient");
