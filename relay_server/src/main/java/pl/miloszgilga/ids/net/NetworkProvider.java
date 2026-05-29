@@ -97,8 +97,8 @@ public class NetworkProvider {
             final InetAddress localHost = InetAddress.getLocalHost();
             LOG.info("Fallback to LocalHost address: {}", localHost.getHostAddress());
             return localHost;
-        } catch (Exception e) {
-            LOG.error("Failed to get fallback localhost address: {}", e.getMessage());
+        } catch (Exception ex) {
+            LOG.error("Failed to get fallback localhost address: {}", ex.getMessage());
             return null;
         }
     }
