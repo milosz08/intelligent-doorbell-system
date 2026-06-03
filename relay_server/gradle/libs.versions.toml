@@ -1,5 +1,6 @@
 [versions]
 bcrypt = "0.10.2"
+buildConfig = "4.1.2"
 gson = "2.13.2"
 hikariCp = "7.0.2"
 jakartaActivationApi = "2.1.4"
@@ -41,5 +42,6 @@ thymeleaf = { module = "org.thymeleaf:thymeleaf", version.ref = "thymeleaf" }
 
 [plugins]
 application = { id = "application" }
+build-config = { id = "com.github.gmazzo.buildconfig", version.ref = "buildConfig" }
 java = { id = "java" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

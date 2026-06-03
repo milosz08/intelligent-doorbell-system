@@ -1,10 +1,14 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 plugins {
     alias(libs.plugins.java)
     alias(libs.plugins.shadow)
     alias(libs.plugins.application)
+    alias(libs.plugins.build.config)
 }
 
 group = "pl.miloszgilga"
@@ -75,6 +79,21 @@ tasks.withType<ShadowJar> {
 tasks.withType<JavaExec> {
     systemProperty("logback.configurationFile", "src/main/resources/logback-dev.xml")
     systemProperty("file.encoding", "UTF-8")
+}
+
+buildConfig {
+    className("AppBuildConfig")
+    packageName("pl.miloszgilga.ids")
+
+    val commitLong = project.findProperty("commitHash")?.toString() ?: "unknown"
+    val commitShort = if (commitLong.length >= 7) commitLong.take(7) else commitLong
+    
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss 'UTC'").withZone(ZoneOffset.UTC)
+    val buildDate = formatter.format(Instant.now())
+
+    buildConfigField("String", "COMPILATION_LONG_HASH", "\"$commitLong\"")
+    buildConfigField("String", "COMPILATION_HASH", "\"$commitShort\"")
+    buildConfigField("String", "BUILD_TIME", "\"$buildDate\"")
 }
 
 fun getEnv(name: String, defValue: String = ""): String {
