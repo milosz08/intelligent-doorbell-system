@@ -32,8 +32,11 @@ public class JdbcUserDao implements UserDao {
                     id INTEGER PRIMARY KEY,
                     username TEXT NOT NULL UNIQUE,
                     password TEXT NOT NULL,
+                    isActive INTEGER NOT NULL DEFAULT 1,
                     defaultPassword INTEGER NOT NULL DEFAULT 1,
-                    permissionsMask BIGINT NOT NULL DEFAULT 0
+                    doNotCheckPassword INTEGER NOT NULL DEFAULT 1,
+                    permissionsMask BIGINT NOT NULL DEFAULT 0,
+                    isSystemAccount INTEGER NOT NULL DEFAULT 0
                 );
                 """, TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
@@ -48,15 +51,19 @@ public class JdbcUserDao implements UserDao {
     @Override
     public List<UserDetails> getUsers() {
         final List<UserDetails> users = new ArrayList<>();
-        final String sql = String.format("SELECT id, username, permissionsMask FROM `%s`;", TABLE_NAME);
+        final String sql = String.format("""
+                SELECT id, username, isActive, permissionsMask, isSystemAccount FROM `%s`;
+                """, TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql);
                 final ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 final UserDetails user = new UserDetails(
-                        rs.getInt("id"),
+                        rs.getLong("id"),
                         rs.getString("username"),
-                        rs.getLong("permissionsMask"));
+                        rs.getBoolean("isActive"),
+                        rs.getLong("permissionsMask"),
+                        rs.getBoolean("isSystemAccount"));
                 users.add(user);
             }
             LOG.debug("Successfully fetched {} user(s)", users.size());
@@ -64,6 +71,31 @@ public class JdbcUserDao implements UserDao {
             LOG.error("Unable to get all users from table: {}, cause: {}", TABLE_NAME, ex.getMessage());
         }
         return users;
+    }
+
+    @Override
+    public UserDetails getUserDetails(long userId) {
+        final String sql = String.format("""
+                SELECT id, username, isActive, permissionsMask, isSystemAccount FROM `%s` WHERE id = ?;
+                """, TABLE_NAME);
+        try (final Connection conn = dbConnectionPool.getConnection();
+                final PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (final ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    LOG.debug("Found user details with id: {}", userId);
+                    return new UserDetails(
+                            rs.getLong("id"),
+                            rs.getString("username"),
+                            rs.getBoolean("isActive"),
+                            rs.getLong("permissionsMask"),
+                            rs.getBoolean("isSystemAccount"));
+                }
+            }
+        } catch (SQLException ex) {
+            LOG.error("Unable to get user details with id: {}, cause: {}", userId, ex.getMessage());
+        }
+        return null;
     }
 
     @Override
@@ -86,7 +118,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public Integer getUserId(String username) {
+    public Long getUserId(String username) {
         final String sql = String.format("SELECT id FROM `%s` WHERE username = ?;", TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -94,7 +126,7 @@ public class JdbcUserDao implements UserDao {
             try (final ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     LOG.debug("Found id for user: {}", username);
-                    return rs.getInt(1);
+                    return rs.getLong(1);
                 }
             }
         } catch (SQLException ex) {
@@ -123,22 +155,27 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public void createUser(String username, String hashedDefaultPassword, long permissionsMask) {
+    public boolean createUser(String username, String hashedDefaultPassword, boolean isActive, long permissionsMask,
+            boolean isSystemAccount) {
         final String sql = String.format("""
-                  INSERT INTO `%s` (username, password, permissionsMask) VALUES (?,?,?);
+                  INSERT INTO `%s` (username, password, isActive, permissionsMask, isSystemAccount) VALUES (?,?,?,?,?);
                 """, TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, hashedDefaultPassword);
-            ps.setLong(3, permissionsMask);
+            ps.setBoolean(3, isActive);
+            ps.setLong(4, permissionsMask);
+            ps.setBoolean(5, isSystemAccount);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
                 LOG.info("Created user with username: {}", username);
+                return true;
             }
         } catch (SQLException ex) {
             LOG.error("Unable to create user with username: {}, cause: {}", username, ex.getMessage());
         }
+        return false;
     }
 
     @Override
@@ -149,7 +186,7 @@ public class JdbcUserDao implements UserDao {
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newHashedPassword);
-            ps.setInt(2, defaultPassword ? 1 : 0);
+            ps.setBoolean(2, defaultPassword);
             ps.setString(3, username);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -188,45 +225,81 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public boolean grantPermission(String username, long permissionBit) {
-        final String sql = String.format("""
-                UPDATE `%s` SET permissionsMask = permissionsMask | ? WHERE username = ?;
-                """, TABLE_NAME);
+    public boolean setPermissions(long userId, long permissionsMask) {
+        final String sql = String.format("UPDATE `%s` SET permissionsMask = ? WHERE id = ?;", TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, permissionBit);
-            ps.setString(2, username);
+            ps.setLong(1, permissionsMask);
+            ps.setLong(2, userId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                LOG.info("Successfully granted permission bit {} to {}", permissionBit, username);
+                LOG.info("Successfully set permissions mask {} from user with id {}", permissionsMask, userId);
                 return true;
             } else {
-                LOG.warn("Grant failed - user '{}' not found", username);
+                LOG.warn("Permissions set failed - user with id {} not found", userId);
             }
         } catch (SQLException ex) {
-            LOG.error("Unable to grant permission to user: {}, cause: {}", username, ex.getMessage());
+            LOG.error("Unable to set permissions from user with id: {}, cause: {}", userId, ex.getMessage());
         }
         return false;
     }
 
     @Override
-    public boolean revokePermission(String username, long permissionBit) {
-        final String sql = String.format("""
-                UPDATE `%s` SET permissionsMask = permissionsMask & ~? WHERE username = ?;
-                """, TABLE_NAME);
+    public boolean setAccountState(long userId, boolean isActive) {
+        final String sql = String.format("UPDATE `%s` SET isActive = ? WHERE id = ?;", TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, permissionBit);
-            ps.setString(2, username);
+            ps.setBoolean(1, isActive);
+            ps.setLong(2, userId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                LOG.info("Successfully revoked permission bit {} from {}", permissionBit, username);
+                LOG.info("Successfully set active state {} from user with id {}", isActive, userId);
                 return true;
             } else {
-                LOG.warn("Revoke failed - user '{}' not found", username);
+                LOG.warn("Active state set failed - user with id {} not found", userId);
             }
         } catch (SQLException ex) {
-            LOG.error("Unable to revoke permission from user: {}, cause: {}", username, ex.getMessage());
+            LOG.error("Unable to set active state from user with id: {}, cause: {}", userId, ex.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setDoNotCheckPassword(long userId, boolean doNotCheckPassword) {
+        final String sql = String.format("UPDATE `%s` SET doNotCheckPassword = ? WHERE id = ?;", TABLE_NAME);
+        try (final Connection conn = dbConnectionPool.getConnection();
+                final PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBoolean(1, doNotCheckPassword);
+            ps.setLong(2, userId);
+            final int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                LOG.info("Successfully set do not check password {} from user with id {}", doNotCheckPassword,
+                        userId);
+                return true;
+            } else {
+                LOG.warn("Do not check password set failed - user with id {} not found", userId);
+            }
+        } catch (SQLException ex) {
+            LOG.error("Unable to set do not check password from user with id: {}, cause: {}", userId,
+                    ex.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteUser(long userId) {
+        final String sql = String.format("DELETE FROM `%s` WHERE id = ?;", TABLE_NAME);
+        try (final Connection conn = dbConnectionPool.getConnection();
+                final PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            final int affectedRows = ps.executeUpdate();
+            if (affectedRows == 1) {
+                LOG.warn("Deleted user with id {} from table: {}", userId, TABLE_NAME);
+                return true;
+            }
+        } catch (SQLException ex) {
+            LOG.error("Unable to delete user with id: from table: {}, cause: {}", userId, TABLE_NAME,
+                    ex.getMessage());
         }
         return false;
     }

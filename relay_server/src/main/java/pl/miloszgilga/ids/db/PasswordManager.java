@@ -42,7 +42,7 @@ public class PasswordManager implements ContentInitializer {
             final String password = Utils.generateSecurePassword(passwordLength);
             final String passwordHash = hash(password);
 
-            userDao.createUser(username, passwordHash, Permission.ADMIN.getBit());
+            userDao.createUser(username, passwordHash, true, Permission.ADMIN.getBit(), true);
             printLoginDetails(password);
             return;
         }

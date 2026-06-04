@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.Instant;
 
 import org.slf4j.Logger;
@@ -30,8 +29,8 @@ public class JdbcSessionDao implements SessionDao {
         final String sql = String.format("""
                   CREATE TABLE IF NOT EXISTS `%s` (
                     sessionId TEXT PRIMARY KEY NOT NULL,
-                    expiredAtUtc DATETIME NOT NULL,
-                    userId INTEGER NOT NULL,
+                    expiredAtUtc BIGINT NOT NULL,
+                    userId BIGINT NOT NULL,
                     FOREIGN KEY(userId) REFERENCES %s(id) ON DELETE CASCADE
                   );
                 """, TABLE_NAME, JdbcUserDao.TABLE_NAME);
@@ -45,38 +44,44 @@ public class JdbcSessionDao implements SessionDao {
     }
 
     @Override
-    public void createSession(String sessionId, Integer userId, Instant expiresAt) {
+    public boolean createSession(String sessionId, long userId, Instant expiresAt) {
         final String sql = String.format("""
                   INSERT INTO `%s` (sessionId, expiredAtUtc, userId) VALUES (?,?,?);
                 """, TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sessionId);
-            ps.setTimestamp(2, Timestamp.from(expiresAt));
-            ps.setInt(3, userId);
+            ps.setLong(2, expiresAt.toEpochMilli());
+            ps.setLong(3, userId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
                 LOG.info("Created session successfully for user ID: {}", userId);
+                return true;
             }
         } catch (SQLException ex) {
             LOG.error("Unable to create session for user: {}, cause: {}", userId, ex.getMessage());
         }
+        return false;
     }
 
     @Override
     public UserDetails getSession(String sessionId) {
-        final Instant now = Instant.now();
         final String sql = String.format("""
-                SELECT userId, username, permissionsMask FROM `%s` s
+                SELECT userId, username, isActive, permissionsMask, isSystemAccount FROM `%s` s
                 INNER JOIN `%s` u ON s.userId = u.id WHERE sessionId = ? AND expiredAtUtc >= ?;
                 """, TABLE_NAME, JdbcUserDao.TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, sessionId);
-            ps.setTimestamp(2, Timestamp.from(now));
+            ps.setLong(2, Instant.now().toEpochMilli());
             try (final ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    final UserDetails user = new UserDetails(rs.getInt(1), rs.getString(2), rs.getLong(3));
+                    final UserDetails user = new UserDetails(
+                            rs.getLong("userId"),
+                            rs.getString("username"),
+                            rs.getBoolean("isActive"),
+                            rs.getLong("permissionsMask"),
+                            rs.getBoolean("isSystemAccount"));
                     LOG.debug("Session is VALID, user: '{}', permissions mask: {}", user.username(),
                             user.permissionsMask());
                     return user;
@@ -95,7 +100,7 @@ public class JdbcSessionDao implements SessionDao {
                 TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setTimestamp(1, Timestamp.from(newExpiresAt));
+            ps.setLong(1, newExpiresAt.toEpochMilli());
             ps.setString(2, sessionId);
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -112,7 +117,7 @@ public class JdbcSessionDao implements SessionDao {
     }
 
     @Override
-    public void destroySession(String sessionId) {
+    public boolean destroySession(String sessionId) {
         final String sql = String.format("DELETE FROM `%s` WHERE sessionId = ?;", TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -123,9 +128,11 @@ public class JdbcSessionDao implements SessionDao {
             } else {
                 LOG.debug("Session destroy skipped - session ID: {} was not found.", sessionId);
             }
+            return true;
         } catch (SQLException ex) {
             LOG.error("Unable to destroy session with session id: {}, cause: {}", sessionId, ex.getMessage());
         }
+        return false;
     }
 
     @Override
@@ -133,6 +140,7 @@ public class JdbcSessionDao implements SessionDao {
         final String sql = String.format("DELETE FROM `%s` WHERE expiredAtUtc < ?;", TABLE_NAME);
         try (final Connection conn = dbConnectionPool.getConnection();
                 final PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, Instant.now().toEpochMilli());
             final int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
                 LOG.info("Cleanup completed, removed {} expired session(s)", affectedRows);

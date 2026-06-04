@@ -48,6 +48,9 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
             if (userDetails == null) {
                 throw new LoginException("Session does not exist or expired");
             }
+            if (!userDetails.isActive()) {
+                throw new LoginException("User account is inactive");
+            }
             final Instant updatedSessionTime = Instant.now().plusSeconds(sessionTtlSec);
             if (!sessionDao.updateSessionTime(sessionId, updatedSessionTime)) {
                 throw new LoginException("Updating session time failed");

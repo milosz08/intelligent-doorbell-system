@@ -64,6 +64,9 @@ public class JettyWsCreator implements WebSocketCreator {
             if (userDetails == null) {
                 throw new LoginException("session not exists");
             }
+            if (!userDetails.isActive()) {
+                throw new LoginException("account not active");
+            }
             if (LOG.isDebugEnabled()) {
                 final List<String> activePerms = permissionManager
                         .getActivePermissionsAsStrings(userDetails.permissionsMask());
