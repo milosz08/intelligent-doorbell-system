@@ -10,6 +10,9 @@ public class Utils {
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final String ALL_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+    public static final String REGEX_USERNAME = "^[a-z0-9]{3,20}$";
+    public static final String REGEX_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,40}$";
+
     private Utils() {
     }
 
@@ -52,5 +55,9 @@ public class Utils {
 
     public static void closeQuietly(Closeable closeable) {
         closeQuietly((ThrowingRunnable) () -> closeable.close());
+    }
+
+    public static boolean isNullOrBlank(String text) {
+        return text == null || text.isBlank();
     }
 }
