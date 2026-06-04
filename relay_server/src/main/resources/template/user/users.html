@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Users management - IDS relay server</title>
+    <th:block th:replace="~{components/head-imports}"></th:block>
+</head>
+
+<body class="root__container root__container--large">
+    <div th:replace="~{components/navbar}"></div>
+    <div th:replace="~{components/alert}"></div>
+    <div class="content__section content__section--between">
+        <button onclick="window.location.href='/users/add-user'">+ Add user</button>
+        <button onclick="window.location.reload()">&#10227; Refresh</button>
+    </div>
+    <div class="content__section">
+        <table class="data-table">
+            <tr>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">ID</th>
+                <th class="data-table__cell">Login/username</th>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">Active</th>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">System account</th>
+                <th class="data-table__cell data-table__cell--fit">Action</th>
+            </tr>
+            <tr th:each="user : ${users}">
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center" th:text="${user.id}"></td>
+                <td class="data-table__cell" th:text="${user.username}"></td>
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                    <input type="checkbox" th:checked="${user.isActive}" disabled>
+                </td>
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                    <input type="checkbox" th:checked="${user.isSystemAccount}" disabled>
+                </td>
+                <td class="data-table__cell data-table__cell--fit">
+                    <button th:onclick="|window.location.href='/users/privileges/${user.id}'|">Privileges</button>
+                    <form th:if="${!user.isActive}" th:action="|/users/account-state/${user.id}|" method="POST"
+                        class="data-table__form">
+                        <input type="hidden" name="isActive" value="true">
+                        <button th:disabled="${user.isSystemAccount or user.id == loggedUser.id}">Activate</button>
+                    </form>
+                    <form th:if="${user.isActive}" th:action="|/users/account-state/${user.id}|" method="POST"
+                        class="data-table__form">
+                        <input type="hidden" name="isActive" value="false">
+                        <button th:disabled="${user.isSystemAccount or user.id == loggedUser.id}">Deactivate</button>
+                    </form>
+                    <form th:action="|/users/delete/${user.id}|" method="POST" class="data-table__form"
+                        th:data-username="${user.username}"
+                        onsubmit="return confirm('Are you sure you want to delete user: ' + this.getAttribute('data-username') + '? This action cannot be undone.');">
+                        <button th:disabled="${user.isSystemAccount or user.id == loggedUser.id}">Delete</button>
+                    </form>
+                    <form th:action="|/users/revoke-password/${user.id}|" method="POST" class="data-table__form"
+                        th:data-username="${user.username}"
+                        onsubmit="return confirm('Are you sure you want to revoke and generate a new password for user: ' + this.getAttribute('data-username') + '?');">
+                        <button th:disabled="${user.id == loggedUser.id}">Revoke password</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="content__section">
+        <table class="data-table">
+            <tr>
+                <th class="data-table__cell">Privilege name</th>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">Bitmask</th>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">Raw value</th>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">Is admin</th>
+                <th class="data-table__cell data-table__cell--fit data-table__cell--center">Count of users</th>
+            </tr>
+            <tr th:each="perm : ${permissions}">
+                <td class="data-table__cell" th:text="${perm.name}"></td>
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                    <code th:text="${perm.bitmask}"></code>
+                </td>
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center" th:text="${perm.rawValue}">
+                </td>
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                    <input type="checkbox" th:checked="${perm.isAdmin}" disabled>
+                </td>
+                <td class="data-table__cell data-table__cell--fit data-table__cell--center"
+                    th:text="${perm.countOfUsers}"></td>
+            </tr>
+        </table>
+    </div>
+    <div th:replace="~{components/footer}"></div>
+</body>
+
+</html>

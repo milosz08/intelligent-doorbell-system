@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Add user - IDS relay server</title>
+    <th:block th:replace="~{components/head-imports}"></th:block>
+</head>
+
+<body class="root__container root__container--large">
+    <div th:replace="~{components/navbar}"></div>
+    <div th:replace="~{components/alert}"></div>
+    <div class="content__section">
+        <div class="alert__container alert__container--info">
+            <div class="alert__text">
+                Enter a password to set it manually, or leave the field blank to auto-generate one. The generated
+                password will be displayed only once upon account creation.
+            </div>
+        </div>
+    </div>
+    <div class="content__section content__section--between">
+        <button onclick="window.location.href='/users'">&lt; Return</button>
+        <button onclick="window.location.reload()">&#10227; Refresh</button>
+    </div>
+    <form action="/users/add-user" method="POST">
+        <div class="content__section">
+            <fieldset class="fieldset-frame">
+                <legend class="fieldset-frame__legend">User details</legend>
+                <table class="form-table">
+                    <tr>
+                        <td class="form-table__cell form-table__cell--label">
+                            <label for="username">Username/login:</label>
+                        </td>
+                        <td class="form-table__cell form-table__cell--control">
+                            <input type="text" id="username" name="username" th:value="${username}">
+                        </td>
+                        <td class="form-table__cell">
+                            <div class="alert__container alert__container--fit alert__container--danger"
+                                th:if="${formErrors != null and formErrors['username'] != null}">
+                                <div class="alert__text alert__text--small" th:text="${formErrors['username']}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="form-table__cell form-table__cell--label">
+                            <label for="password">Password (can be empty):</label>
+                        </td>
+                        <td class="form-table__cell form-table__cell--control">
+                            <input type="password" id="password" name="password">
+                        </td>
+                        <td class="form-table__cell">
+                            <div class="alert__container alert__container--fit alert__container--danger"
+                                th:if="${formErrors != null and formErrors['password'] != null}">
+                                <div class="alert__text alert__text--small" th:text="${formErrors['password']}"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="form-table__cell"></td>
+                        <td class="form-table__cell form-table__cell--label">
+                            <input type="checkbox" id="isActive" name="isActive" th:checked="${isActive}">
+                            <label for="isActive">Instant activate account</label>
+                        </td>
+                        <td class="form-table__cell"></td>
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+        <div class="content__section">
+            <table class="data-table">
+                <tr>
+                    <th class="data-table__cell">Privilege name</th>
+                    <th class="data-table__cell data-table__cell--fit data-table__cell--center">Bitmask</th>
+                    <th class="data-table__cell data-table__cell--fit data-table__cell--center">Raw value</th>
+                    <th class="data-table__cell data-table__cell--fit data-table__cell--center">Is admin</th>
+                    <th class="data-table__cell data-table__cell--fit data-table__cell--center">Is active</th>
+                </tr>
+                <tr th:each="perm : ${permissions}">
+                    <td class="data-table__cell" th:text="${perm.name}"></td>
+                    <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                        <code th:text="${perm.bitmask}"></code>
+                    </td>
+                    <td class="data-table__cell data-table__cell--fit data-table__cell--center"
+                        th:text="${perm.rawValue}"></td>
+                    <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                        <input type="checkbox" th:checked="${perm.isAdmin}" disabled>
+                    </td>
+                    <td class="data-table__cell data-table__cell--fit data-table__cell--center">
+                        <input type="checkbox" name="privileges" th:value="${perm.name}" th:checked="${perm.isActive}">
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="content__section content__section--center">
+            <button>Add user</button>
+        </div>
+    </form>
+    <div th:replace="~{components/footer}"></div>
+</body>
+
+</html>
