@@ -1,0 +1,5 @@
+<div class="content__section" th:if="${alert != null}">
+    <div class="alert__container" th:classappend="'alert__container--' + ${alert.type()}">
+        <div class="alert__text" th:text="${alert.message()}"></div>
+    </div>
+</div>

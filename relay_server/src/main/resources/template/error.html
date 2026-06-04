@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Internal server error - IDS relay server</title>
+    <th:block th:replace="~{components/head-imports}"></th:block>
+</head>
+
+<body class="root__container root__container--large">
+    <div class="content__section content__section--end">
+        <button onclick="window.location.reload()">&#10227; Refresh</button>
+    </div>
+    <div th:replace="~{components/alert}"></div>
+    <div th:replace="~{components/footer}"></div>
+</body>

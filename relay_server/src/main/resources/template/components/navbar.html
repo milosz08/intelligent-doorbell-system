@@ -1,0 +1,14 @@
+<div class="header__container">
+    <div class="header__section">
+        <a th:each="link : ${navLinks}" th:attr="href=${link.isActive ? null : link.url}"
+            th:class="${link.isActive ? 'header__section-link--disabled' : ''}" th:text="${link.name}">
+        </a>
+    </div>
+    <div class="header__section">
+        <div>Logged as: <strong th:text="${loggedUser.username}"></strong></div>
+        <form action="/logout" method="POST" class="inline-form">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+</div>
+<hr class="content__separator">
