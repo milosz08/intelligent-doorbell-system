@@ -40,7 +40,9 @@ jobs:
 
       - name: Determinate build version
         id: version
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: |
+          echo "sha_full=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "sha_short=${{ github.sha }}" | cut -c1-7 >> $GITHUB_OUTPUT
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -48,14 +50,14 @@ jobs:
       - name: Run tests
         run: |
           ./gradlew clean --no-daemon
-          ./gradlew test --no-daemon
+          ./gradlew test --no-daemon -PcommitHash=${{ steps.version.outputs.sha_full }}
         env:
           RELAY_SERVER_VERSION: ${{ steps.version.outputs.sha_short }}
 
       - name: Package to JAR
         run: |
           ./gradlew clean --no-daemon
-          ./gradlew shadowJar --no-daemon
+          ./gradlew shadowJar --no-daemon -PcommitHash=${{ steps.version.outputs.sha_full }}
         env:
           RELAY_SERVER_VERSION: ${{ steps.version.outputs.sha_short }}
 
