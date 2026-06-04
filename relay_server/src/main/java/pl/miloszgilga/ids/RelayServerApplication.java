@@ -11,16 +11,23 @@ import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dao.UserDao;
 import pl.miloszgilga.ids.db.jdbc.JdbcSessionDao;
 import pl.miloszgilga.ids.db.jdbc.JdbcUserDao;
-import pl.miloszgilga.ids.http.GlobalExceptionMapper;
 import pl.miloszgilga.ids.http.HttpService;
+import pl.miloszgilga.ids.http.api.ApiGlobalExceptionMapper;
 import pl.miloszgilga.ids.http.api.auth.ApiAuthFilter;
 import pl.miloszgilga.ids.http.api.resource.auth.AuthResource;
 import pl.miloszgilga.ids.http.template.HtmlTemplateEngine;
+import pl.miloszgilga.ids.http.web.WebGlobalExceptionMapper;
 import pl.miloszgilga.ids.http.web.auth.GuestViewFilter;
 import pl.miloszgilga.ids.http.web.auth.SessionRefreshViewResponseFilter;
 import pl.miloszgilga.ids.http.web.auth.WebAuthFilter;
-import pl.miloszgilga.ids.http.web.resource.dashboard.DashboardViewResource;
-import pl.miloszgilga.ids.http.web.resource.login.LoginViewResource;
+import pl.miloszgilga.ids.http.web.nav.NavigationManager;
+import pl.miloszgilga.ids.http.web.resource.DashboardViewResource;
+import pl.miloszgilga.ids.http.web.resource.EventLogsViewResource;
+import pl.miloszgilga.ids.http.web.resource.SettingsViewResource;
+import pl.miloszgilga.ids.http.web.resource.auth.ChangePasswordViewResource;
+import pl.miloszgilga.ids.http.web.resource.auth.LoginViewResource;
+import pl.miloszgilga.ids.http.web.resource.auth.PasswordChangeFilter;
+import pl.miloszgilga.ids.http.web.resource.user.UsersViewResource;
 import pl.miloszgilga.ids.http.ws.WsSessionRegistry;
 import pl.miloszgilga.ids.http.ws.handler.DoorbellModeSetHandler;
 import pl.miloszgilga.ids.http.ws.handler.DoorbellRingHandler;
@@ -81,6 +88,7 @@ class RelayServerApplication implements Runnable {
 
             final PermissionManager<Permission> permissionManager = new PermissionManager<>(
                     Permission.values());
+            final NavigationManager navigationManager = new NavigationManager(permissionManager);
             final WsSessionRegistry wsSessionRegistry = new WsSessionRegistry(permissionManager);
 
             mqttService = MqttService.builder()
@@ -103,36 +111,55 @@ class RelayServerApplication implements Runnable {
                     .build();
             mdnsService.init();
 
-            final HtmlTemplateEngine templateEngine = new HtmlTemplateEngine(
+            final HtmlTemplateEngine htmlTemplateEngine = new HtmlTemplateEngine(
                     appConfig.getAsBoolean(AppConfig.Prop.ENABLE_HTML_TEMPLATES_CACHING));
-            templateEngine.init();
+            htmlTemplateEngine.init();
 
             httpService = HttpService.builder()
                     .port(appConfig.getAsInt(AppConfig.Prop.HTTP_PORT))
                     .sessionDao(sessionDao)
                     .wsSessionRegistry(wsSessionRegistry)
                     .permissionManager(permissionManager)
-                    // api
-                    .addResource(new AuthResource(
+                    // api (headless)
+                    .addApiResource(new AuthResource(
                             passwordManager,
                             userDao,
                             sessionDao,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
-                    .addResource(new ApiAuthFilter(sessionDao, permissionManager,
+                    .addApiResource(new ApiAuthFilter(sessionDao, permissionManager,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
-                    .addResource(new GlobalExceptionMapper())
+                    .addApiResource(new ApiGlobalExceptionMapper())
                     // html views
-                    .addResource(new DashboardViewResource(templateEngine, userDao, sessionDao))
-                    .addResource(new LoginViewResource(
-                            templateEngine,
+                    .addWebResource(new DashboardViewResource(htmlTemplateEngine, navigationManager,
+                            sessionDao,
+                            networkProvider,
+                            appConfig.getAsStr(AppConfig.Prop.MDNS_SERVICE_NAME)))
+                    .addWebResource(new LoginViewResource(
+                            htmlTemplateEngine,
+                            navigationManager,
                             userDao,
                             sessionDao,
                             passwordManager,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
-                    .addResource(new WebAuthFilter(sessionDao, permissionManager,
+                    .addWebResource(new ChangePasswordViewResource(htmlTemplateEngine,
+                            navigationManager, userDao,
+                            passwordManager))
+                    .addWebResource(new PasswordChangeFilter(userDao))
+                    .addWebResource(new EventLogsViewResource(htmlTemplateEngine,
+                            navigationManager))
+                    .addWebResource(new SettingsViewResource(htmlTemplateEngine, navigationManager))
+                    .addWebResource(new UsersViewResource(
+                            htmlTemplateEngine,
+                            navigationManager,
+                            userDao,
+                            permissionManager,
+                            passwordManager,
+                            appConfig.getAsInt(AppConfig.Prop.ADMIN_PASSWORD_LENGTH)))
+                    .addWebResource(new WebAuthFilter(sessionDao, permissionManager,
                             appConfig.getAsInt(AppConfig.Prop.SESSION_TTL_SEC)))
-                    .addResource(new GuestViewFilter())
-                    .addResource(new SessionRefreshViewResponseFilter())
+                    .addWebResource(new GuestViewFilter(sessionDao))
+                    .addWebResource(new SessionRefreshViewResponseFilter())
+                    .addWebResource(new WebGlobalExceptionMapper(htmlTemplateEngine))
                     // websocket
                     .addWsRouter(new DoorbellModeSetHandler(mqttService, wsSessionRegistry))
                     .addWsRouter(new DoorbellRingHandler(mqttService, wsSessionRegistry))
