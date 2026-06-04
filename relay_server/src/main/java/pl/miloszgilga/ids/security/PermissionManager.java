@@ -1,6 +1,7 @@
 package pl.miloszgilga.ids.security;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -30,11 +31,31 @@ public class PermissionManager<T extends Enum<T> & BitmaskPermission> {
         return (mask & adminMask) != 0;
     }
 
-    public boolean hasPermission(long userMask, BitmaskPermission requiredPermission) {
+    public long generateMask(List<String> permissionNames) {
+        if (permissionNames == null || permissionNames.size() == 0) {
+            return 0L;
+        }
+        long generatedMask = 0L;
+        for (final String name : permissionNames) {
+            if (name == null || name.trim().isEmpty()) {
+                continue;
+            }
+            final T permission = permissionMap.get(name.toUpperCase());
+            if (permission != null) {
+                generatedMask |= permission.getBit();
+            } else {
+                LOG.warn("Skipping unknown permission name '{}' during mask generation", name);
+            }
+        }
+        LOG.debug("Generated mask: {} for requested permissions: {}", generatedMask, permissionNames);
+        return generatedMask;
+    }
+
+    public boolean hasPermission(long userMask, BitmaskPermission requiredPermission, boolean overrideForAdmin) {
         if (requiredPermission == null) {
             return false;
         }
-        if (isUserAdmin(userMask)) {
+        if (isUserAdmin(userMask) && overrideForAdmin) {
             LOG.debug("Access granted: user has ADMIN override");
             return true;
         }
@@ -43,15 +64,23 @@ public class PermissionManager<T extends Enum<T> & BitmaskPermission> {
         return hasPerm;
     }
 
-    public boolean hasPermission(long userMask, String requiredRoleOrPermission) {
+    public boolean hasPermission(long userMask, BitmaskPermission requiredPermission) {
+        return hasPermission(userMask, requiredPermission, true);
+    }
+
+    public boolean hasPermission(long userMask, String requiredRoleOrPermission, boolean overrideForAdmin) {
         try {
             final T permission = permissionMap.get(requiredRoleOrPermission.toUpperCase());
-            return hasPermission(userMask, permission);
+            return hasPermission(userMask, permission, overrideForAdmin);
         } catch (IllegalArgumentException ex) {
             LOG.error("Unable to find followed permission: {}, cause: {}", requiredRoleOrPermission,
                     ex.getMessage());
             return false;
         }
+    }
+
+    public boolean hasPermission(long userMask, String requiredRoleOrPermission) {
+        return hasPermission(userMask, requiredRoleOrPermission, true);
     }
 
     public boolean hasAnyPermission(long userMask, BitmaskPermission... requiredPermissions) {
@@ -106,5 +135,26 @@ public class PermissionManager<T extends Enum<T> & BitmaskPermission> {
                 .filter(entry -> (userMask & entry.getValue().getBit()) != 0)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+    }
+
+    public int countEntitiesWithPermission(List<? extends MaskBearer> entities, BitmaskPermission permission) {
+        if (entities == null || permission == null) {
+            return 0;
+        }
+        return (int) entities.stream()
+                .filter(entity -> (entity.getPermissionsMask() & permission.getBit()) != 0)
+                .count();
+    }
+
+    public String formatBitmaskString(BitmaskPermission permission) {
+        if (permission == null || permission.getBit() == 0) {
+            return "0";
+        }
+        final int shift = Long.numberOfTrailingZeros(permission.getBit());
+        return "1 << " + shift;
+    }
+
+    public Collection<T> getPermissions() {
+        return permissionMap.values();
     }
 }
