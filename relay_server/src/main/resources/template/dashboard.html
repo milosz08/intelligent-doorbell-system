@@ -1,20 +1,214 @@
 <!DOCTYPE html>
-<html lang="pl" xmlns:th="http://www.thymeleaf.org"
-    th:replace="~{template/layout.html :: baseLayout('Dashboard - IDS Server', ~{:: main}, ~{:: #dashboard-scripts})}">
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
 
-<body>
-    <main>
-        <h2>IDS dashboard</h2>
-        Logged as:
-        <b th:text="${user.username}"></b>
-        (permissions mask: <span th:text="${user.permissionsMask}"></span>)
-        <form action="/logout" method="POST">
-            <button type="submit" class="btn btn-primary btn-sm">Logout</button>
-        </form>
-    </main>
-    <th:block id="dashboard-scripts">
-        <script src="/static/dashboard.js"></script>
-    </th:block>
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - IDS relay server</title>
+    <th:block th:replace="~{components/head-imports}"></th:block>
+</head>
+
+<body class="root__container root__container--large">
+    <div th:replace="~{components/navbar}"></div>
+    <div th:replace="~{components/alert}"></div>
+    <div class="content__section content__section--between">
+        <div>
+            <div>IDS relay server IP: <strong th:text="${serverIp}"></strong></div>
+            <div>mDNS service name: <strong th:text="${mdnsServiceName}"></strong></div>
+        </div>
+        <button onclick="window.location.reload()">&#10227; Refresh</button>
+    </div>
+    <div class="content__section">
+        <fieldset class="fieldset-frame fieldset-frame--60-width">
+            <legend class="fieldset-frame__legend">System info</legend>
+            <table class="telemetry-table">
+                <tr>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">CPU load</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">CPU temp (&deg;C/&deg;F)</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Memory</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Swap</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Disk space</td>
+                </tr>
+                <tr>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 45%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">40%</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 45%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">40&deg;C/80&deg;F</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 45%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">65% of 1024MB</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 45%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">0% of 1024MB</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 45%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">0% of 120GB</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class="telemetry-table">
+                <tr>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Disk (R/W)</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Network (RX/TX)</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Uptime</td>
+                </tr>
+                <tr>
+                    <td class="telemetry-table__cell">20MB/10MB</td>
+                    <td class="telemetry-table__cell">12MB/40MB</td>
+                    <td class="telemetry-table__cell">24 day(s) 3 hour(s)</td>
+                </tr>
+            </table>
+        </fieldset>
+        <fieldset class="fieldset-frame fieldset-frame--40-width">
+            <legend class="fieldset-frame__legend">JVM info</legend>
+            <table class="telemetry-table">
+                <tr>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">CPU load</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Memory</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">File descriptors</td>
+                </tr>
+                <tr>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 45%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">40%</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--warning"
+                                style="width: 80%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">65% of 1024MB</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--danger"
+                                style="width: 90%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">150/1024</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table class="telemetry-table">
+                <tr>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Thread pool</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Uptime</td>
+                </tr>
+                <tr>
+                    <td class="telemetry-table__cell">live: 45, peak: 62</td>
+                    <td class="telemetry-table__cell">24 day(s) 3 hour(s)</td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+    <div class="content__section">
+        <fieldset class="fieldset-frame">
+            <legend class="fieldset-frame__legend">MQTT broker info</legend>
+            <table class="telemetry-table">
+                <tr>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Active connections</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Queue capacity</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Arrival (&lambda;)</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Service (&mu;)</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Saturation</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Subscriptions</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Retained msgs</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Dropped/rejected</td>
+                </tr>
+                <tr>
+                    <td class="telemetry-table__cell">1</td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--danger"
+                                style="width: 90%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">150/1000</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">120.5 msg/s</td>
+                    <td class="telemetry-table__cell">150.0 msg/s</td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--warning"
+                                style="width: 80%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">80.3%</div>
+                        </div>
+                    </td>
+                    <td class="telemetry-table__cell">1 250</td>
+                    <td class="telemetry-table__cell">42</td>
+                    <td class="telemetry-table__cell">42</td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+    <div class="content__section">
+        <fieldset class="fieldset-frame">
+            <legend class="fieldset-frame__legend">Server info</legend>
+            <table class="telemetry-table">
+                <tr>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Active sessions</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">Active WS connections</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">WS TXs</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">API requests</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">API avg latency</td>
+                    <td class="telemetry-table__cell telemetry-table__cell--header">SQLite DB size</td>
+                </tr>
+                <tr>
+                    <td class="telemetry-table__cell">1</td>
+                    <td class="telemetry-table__cell">3</td>
+                    <td class="telemetry-table__cell">24.5 msg/s</td>
+                    <td class="telemetry-table__cell">12.3 req/s</td>
+                    <td class="telemetry-table__cell">45 ms</td>
+                    <td class="telemetry-table__cell">
+                        <div class="telemetry-table__progress">
+                            <div class="telemetry-table__progress-bar telemetry-table__progress-bar--normal"
+                                style="width: 10%;">
+                            </div>
+                            <div class="telemetry-table__progress-text">12MB/120GB</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    </div>
+    <div class="content__section">
+        <fieldset class="fieldset-frame">
+            <legend class="fieldset-frame__legend">Devices info</legend>
+            Devices info
+        </fieldset>
+    </div>
+    <div th:replace="~{components/footer}"></div>
 </body>
 
 </html>
