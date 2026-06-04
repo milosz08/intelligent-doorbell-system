@@ -18,6 +18,8 @@ public class HtmlTemplateEngine {
     public HtmlTemplateEngine(boolean cacheable) {
         final ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
         resolver.setTemplateMode(TemplateMode.HTML);
+        resolver.setPrefix("/template/");
+        resolver.setSuffix(".html");
         resolver.setCharacterEncoding(StandardCharsets.UTF_8.name());
         resolver.setCacheable(cacheable);
         thymeleafEngine = new TemplateEngine();
