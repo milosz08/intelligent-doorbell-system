@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Event logs - IDS relay server</title>
+    <th:block th:replace="~{components/head-imports}"></th:block>
+</head>
+
+<body class="root__container root__container--large">
+    <div th:replace="~{components/navbar}"></div>
+    <div th:replace="~{components/alert}"></div>
+    <div class="content__section content__section--end">
+        <button onclick="window.location.reload()">&#10227; Refresh</button>
+    </div>
+    <div class="content__section">
+        event logs
+    </div>
+    <div th:replace="~{components/footer}"></div>
+</body>
+
+</html>
