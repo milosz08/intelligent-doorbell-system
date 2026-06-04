@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - IDS relay server</title>
+    <th:block th:replace="~{components/head-imports}"></th:block>
+</head>
+
+<body class="root__container root__container--large">
+    <div th:replace="~{components/navbar}"></div>
+    <div th:replace="~{components/alert}"></div>
+    <div class="content__section content__section--end">
+        <button onclick="window.location.reload()">&#10227; Refresh</button>
+    </div>
+    <form action="account" method="POST">
+        <div class="content__section">
+            <fieldset class="fieldset-frame">
+                <legend class="fieldset-frame__legend">Account settings</legend>
+                <table class="form-table">
+                    <tr>
+                        <td class="form-table__cell form-table__cell--control">
+                            <input type="checkbox" id="omitDefaultPasswordCheck" name="omitDefaultPasswordCheck">
+                        </td>
+                        <td class="form-table__cell form-table__cell--label">
+                            <label for="omitDefaultPasswordCheck">Omit change default password page</label>
+                        </td>
+                        <td class="form-table__cell"></td>
+                    </tr>
+                </table>
+            </fieldset>
+        </div>
+        <div class="content__section content__section--center">
+            <button>Update account settings</button>
+        </div>
+    </form>
+    <form action="system" method="POST">
+        <div class="content__section">
+            <fieldset class="fieldset-frame">
+                <legend class="fieldset-frame__legend">System settings</legend>
+            </fieldset>
+        </div>
+        <div class="content__section content__section--center">
+            <button>Update system settings</button>
+        </div>
+    </form>
+    <div th:replace="~{components/footer}"></div>
+</body>
+
+</html>
