@@ -1,0 +1,244 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.alert__container {
+    width: 100%;
+    border-radius: 2px;
+}
+
+.alert__container--fit {
+    width: max-content;
+}
+
+.alert__container--info {
+    background-color: #99C2FF;
+}
+
+.alert__container--success {
+    background-color: #7FBF7F;
+}
+
+.alert__container--warning {
+    background-color: #FFD27F;
+}
+
+.alert__container--danger {
+    background-color: #FF7F7F;
+}
+
+.alert__text {
+    padding: 10px;
+}
+
+.alert__text--small {
+    padding: 4px;
+    font-size: 0.9rem;
+}
+
+.root__container {
+    display: flex;
+    flex-direction: column;
+}
+
+.root__container--large {
+    width: 1280px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.root__container--card {
+    width: 300px;
+    margin: 60px auto;
+}
+
+.header__container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.header__section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header__section-link--disabled {
+    text-decoration: none;
+    color: inherit;
+}
+
+.content__section {
+    display: flex;
+    margin: 10px 0;
+    width: 100%;
+    gap: 10px;
+    align-items: center;
+}
+
+.content__section--between {
+    justify-content: space-between;
+}
+
+.content__section--center {
+    justify-content: center;
+}
+
+.content__section--end {
+    justify-content: flex-end;
+}
+
+.content__separator {
+    border-top: 1px solid;
+    margin: 20px 0;
+}
+
+.inline-form {
+    display: inline-block;
+}
+
+.form-table {
+    width: fit-content;
+    border: none;
+}
+
+.form-table__cell {
+    border: none;
+    padding: 5px 10px 5px 0;
+}
+
+.form-table__cell--label,
+.form-table__cell--control {
+    text-align: right;
+    width: 1%;
+    white-space: nowrap;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table__cell {
+    border: 1px solid;
+    padding: 6px 8px;
+    text-align: left;
+}
+
+.data-table__cell--fit {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.data-table__cell--center {
+    text-align: center;
+}
+
+.data-table__form {
+    display: inline;
+}
+
+.fieldset-frame {
+    margin: 0;
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fieldset-frame--60-width {
+    flex-basis: 60%;
+}
+
+.fieldset-frame--40-width {
+    flex-basis: 40%;
+}
+
+.fieldset-frame__legend {
+    padding: 0 5px;
+}
+
+.vertical-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.vertical-form__control-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.vertical-form__control-container--horizontal {
+    flex-direction: row;
+}
+
+.version-box__container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+}
+
+.version-box__text {
+    font-size: 0.8rem;
+}
+
+.telemetry-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.telemetry-table__cell {
+    height: 20px;
+    text-align: center;
+}
+
+.telemetry-table__cell--header {
+    font-weight: bold;
+}
+
+.telemetry-table__progress {
+    background-color: #E5E5E5;
+    position: relative;
+    height: 100%;
+    margin: 0 10px;
+}
+
+.telemetry-table__progress-bar,
+.telemetry-table__progress-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.telemetry-table__progress-bar {
+    height: 100%;
+}
+
+.telemetry-table__progress-bar--normal {
+    background-color: #7FBF7F;
+}
+
+.telemetry-table__progress-bar--warning {
+    background-color: #FFD27F;
+}
+
+.telemetry-table__progress-bar--danger {
+    background-color: #FF7F7F;
+}
+
+.telemetry-table__progress-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    font-size: 0.9rem;
+}
