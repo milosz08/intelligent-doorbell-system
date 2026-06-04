@@ -39,7 +39,8 @@ public class HttpService implements ComponentLifecycle {
     private final WsRouter wsRouter;
     private final WsSessionRegistry wsSessionRegistry;
     private final PermissionManager<Permission> permissionManager;
-    private final Set<Object> resources;
+    private final Set<Object> apiResources;
+    private final Set<Object> webResources;
 
     private Server server;
     private ServerConnector connector;
@@ -50,7 +51,8 @@ public class HttpService implements ComponentLifecycle {
         wsSessionRegistry = builder.wsSessionRegistry;
         permissionManager = builder.permissionManager;
         wsRouter = builder.wsRouter;
-        resources = builder.resources;
+        apiResources = builder.apiResources;
+        webResources = builder.webResources;
     }
 
     public static Builder builder() {
@@ -98,10 +100,16 @@ public class HttpService implements ComponentLifecycle {
         wsHandler.setHandler(context);
         server.setHandler(wsHandler);
 
-        final JettyResourceConfig resourceConfig = new JettyResourceConfig(resources);
-        final ServletHolder jerseyServlet = new ServletHolder(new ServletContainer(resourceConfig));
+        // for api (headless)
+        final JettyResourceConfig apiConfig = new JettyResourceConfig(apiResources);
+        final ServletHolder jerseyApiServlet = new ServletHolder(new ServletContainer(apiConfig));
+        context.addServlet(jerseyApiServlet, "/api/*");
 
-        context.addServlet(jerseyServlet, "/*");
+        // for web (html)
+        final JettyResourceConfig webConfig = new JettyResourceConfig(webResources);
+        final ServletHolder jerseyWebServlet = new ServletHolder(new ServletContainer(webConfig));
+        context.addServlet(jerseyWebServlet, "/*");
+
         try {
             LOG.info("HTTP server starting on port {}...", port);
             server.start();
@@ -124,7 +132,8 @@ public class HttpService implements ComponentLifecycle {
         private WsSessionRegistry wsSessionRegistry;
         private PermissionManager<Permission> permissionManager;
         private final WsRouter wsRouter = new WsRouter();
-        private final Set<Object> resources = new HashSet<>();
+        private final Set<Object> apiResources = new HashSet<>();
+        private final Set<Object> webResources = new HashSet<>();
 
         private Builder() {
         }
@@ -149,8 +158,13 @@ public class HttpService implements ComponentLifecycle {
             return this;
         }
 
-        public Builder addResource(Object resource) {
-            resources.add(resource);
+        public Builder addApiResource(Object resource) {
+            apiResources.add(resource);
+            return this;
+        }
+
+        public Builder addWebResource(Object resource) {
+            webResources.add(resource);
             return this;
         }
 

@@ -1,6 +1,7 @@
 package pl.miloszgilga.ids.http.api.resource.auth;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -15,12 +16,14 @@ import pl.miloszgilga.ids.db.PasswordManager;
 import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dao.UserDao;
 import pl.miloszgilga.ids.http.Constants;
+import pl.miloszgilga.ids.http.api.HttpApiPipelineException;
 import pl.miloszgilga.ids.http.api.auth.ApiAuthenticated;
+import pl.miloszgilga.ids.http.api.resource.ApiResourceBase;
 
 @Path("/api/v1/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AuthResource {
+public class AuthResource extends ApiResourceBase {
     private final PasswordManager passwordManager;
     private final UserDao userDao;
     private final SessionDao sessionDao;
@@ -36,19 +39,25 @@ public class AuthResource {
     @POST
     @Path("/login")
     public Response login(LoginRequest request) {
-        final String username = request.username();
-        final String password = request.password();
-        if (username == null || password == null || !passwordManager.verify(username, password)) {
-            return Response.status(Response.Status.UNAUTHORIZED)
-                    .entity("")
-                    .type(MediaType.TEXT_PLAIN)
-                    .build();
+        try {
+            final String username = request.username();
+            final String password = request.password();
+            if (username == null || password == null || !passwordManager.verify(username, password)) {
+                throw new HttpApiPipelineException(Response.Status.UNAUTHORIZED);
+            }
+            final Long userId = userDao.getUserId(username);
+            if (userId == null) {
+                throw new HttpApiPipelineException(Response.Status.UNAUTHORIZED);
+            }
+            final String sessionToken = UUID.randomUUID().toString();
+            final Instant expiresAt = Instant.now().plusSeconds(sessionTtlSec);
+            if (!sessionDao.createSession(sessionToken, userId, expiresAt)) {
+                throw new HttpApiPipelineException(Response.Status.INTERNAL_SERVER_ERROR);
+            }
+            return Response.ok(new LoginResponse(Constants.SID_HEADER_NAME, sessionToken)).build();
+        } catch (HttpApiPipelineException ex) {
+            return generateGenericError(ex);
         }
-        final Integer userId = userDao.getUserId(username);
-        final String sessionToken = java.util.UUID.randomUUID().toString();
-        final Instant expiresAt = Instant.now().plusSeconds(sessionTtlSec);
-        sessionDao.createSession(sessionToken, userId, expiresAt);
-        return Response.ok(new LoginResponse(Constants.SID_HEADER_NAME, sessionToken)).build();
     }
 
     @ApiAuthenticated
@@ -56,9 +65,16 @@ public class AuthResource {
     @Path("/logout")
     public Response logout(@Context ContainerRequestContext crc) {
         final String sessionId = (String) crc.getProperty("sessionId");
-        if (sessionId != null) {
-            sessionDao.destroySession(sessionId);
+        try {
+            if (sessionId != null) {
+                throw new HttpApiPipelineException(Response.Status.NOT_FOUND);
+            }
+            if (!sessionDao.destroySession(sessionId)) {
+                throw new HttpApiPipelineException(Response.Status.INTERNAL_SERVER_ERROR);
+            }
+            return Response.noContent().build();
+        } catch (HttpApiPipelineException ex) {
+            return generateGenericError(ex);
         }
-        return Response.noContent().build();
     }
 }
