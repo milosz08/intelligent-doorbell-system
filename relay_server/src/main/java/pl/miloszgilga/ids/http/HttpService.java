@@ -101,14 +101,9 @@ public class HttpService implements ComponentLifecycle {
         server.setHandler(wsHandler);
 
         // for api (headless)
-        final JettyResourceConfig apiConfig = new JettyResourceConfig(apiResources);
-        final ServletHolder jerseyApiServlet = new ServletHolder(new ServletContainer(apiConfig));
-        context.addServlet(jerseyApiServlet, "/api/*");
-
+        context.addServlet(createServletHolder(apiResources), "/api/*");
         // for web (html)
-        final JettyResourceConfig webConfig = new JettyResourceConfig(webResources);
-        final ServletHolder jerseyWebServlet = new ServletHolder(new ServletContainer(webConfig));
-        context.addServlet(jerseyWebServlet, "/*");
+        context.addServlet(createServletHolder(webResources), "/*");
 
         try {
             LOG.info("HTTP server starting on port {}...", port);
@@ -124,6 +119,11 @@ public class HttpService implements ComponentLifecycle {
         connector.close();
         Utils.closeQuietly((ThrowingRunnable) () -> server.stop());
         LOG.info("Connector and HTTP server was successfully closed");
+    }
+
+    private ServletHolder createServletHolder(Set<Object> resources) {
+        final JettyResourceConfig webConfig = new JettyResourceConfig(resources);
+        return new ServletHolder(new ServletContainer(webConfig));
     }
 
     public static class Builder {
