@@ -9,8 +9,10 @@ import pl.miloszgilga.ids.db.ExpiredSessionRemoval;
 import pl.miloszgilga.ids.db.PasswordManager;
 import pl.miloszgilga.ids.db.dao.SessionDao;
 import pl.miloszgilga.ids.db.dao.UserDao;
-import pl.miloszgilga.ids.db.jdbc.JdbcSessionDao;
-import pl.miloszgilga.ids.db.jdbc.JdbcUserDao;
+import pl.miloszgilga.ids.db.mapper.SessionMapper;
+import pl.miloszgilga.ids.db.mapper.UserMapper;
+import pl.miloszgilga.ids.db.mybatis.MyBatisSessionDao;
+import pl.miloszgilga.ids.db.mybatis.MyBatisUserDao;
 import pl.miloszgilga.ids.http.HttpService;
 import pl.miloszgilga.ids.http.api.ApiGlobalExceptionMapper;
 import pl.miloszgilga.ids.http.api.auth.ApiAuthFilter;
@@ -63,11 +65,13 @@ class RelayServerApplication implements Runnable {
             dbConnectionPool = DbConnectionPool.builder()
                     .dbName(appConfig.getAsStr(AppConfig.Prop.DB_PATH))
                     .maximumPoolSize(appConfig.getAsInt(AppConfig.Prop.DB_POOL_SIZE))
+                    .addMyBatisMapperClass(SessionMapper.class)
+                    .addMyBatisMapperClass(UserMapper.class)
                     .build();
             dbConnectionPool.init();
 
-            final UserDao userDao = new JdbcUserDao(dbConnectionPool);
-            final SessionDao sessionDao = new JdbcSessionDao(dbConnectionPool);
+            final UserDao userDao = new MyBatisUserDao(dbConnectionPool);
+            final SessionDao sessionDao = new MyBatisSessionDao(dbConnectionPool);
 
             userDao.init();
             sessionDao.init();

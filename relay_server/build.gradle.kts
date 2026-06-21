@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.jul.to.slf4j)
     implementation(libs.logback.classic)
     implementation(libs.moquette.broker)
+    implementation(libs.mybatis)
     implementation(libs.sqlite.jdbc)
     implementation(libs.thymeleaf)
     testImplementation(platform(libs.junit.bom))

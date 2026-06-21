@@ -12,6 +12,7 @@ junit = "5.10.2"
 logback = "1.5.32"
 mockito = "5.23.0"
 moquette = "0.18.0"
+mybatis = "3.5.19"
 mqttPaho = "1.2.5"
 shadow = "8.3.0"
 sqlite = "3.53.0.0"
@@ -36,6 +37,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-jupyter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 moquette-broker = { module = "com.github.moquette-io.moquette:moquette-broker", version.ref = "moquette" }
+mybatis = { module = "org.mybatis:mybatis", version.ref = "mybatis" }
 mqtt-paho = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "mqttPaho" }
 sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
 thymeleaf = { module = "org.thymeleaf:thymeleaf", version.ref = "thymeleaf" }
