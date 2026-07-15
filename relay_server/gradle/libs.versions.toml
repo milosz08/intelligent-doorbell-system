@@ -14,7 +14,7 @@ mockito = "5.23.0"
 moquette = "0.18.0"
 mybatis = "3.5.19"
 mqttPaho = "1.2.5"
-shadow = "8.3.0"
+shadow = "8.3.6"
 sqlite = "3.53.0.0"
 thymeleaf = "3.1.5.RELEASE"
 
