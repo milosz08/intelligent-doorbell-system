@@ -8,7 +8,7 @@ idf_component_register(
         "include"
 
     REQUIRES
-        json
+        cjson
         app_state
         doorbell_ctrl
         mqtt_bus

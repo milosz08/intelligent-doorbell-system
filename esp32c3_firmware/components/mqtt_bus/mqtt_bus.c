@@ -6,7 +6,7 @@
 
 #include "esp_log.h"
 #include "esp_mac.h"
-#include "mbedtls/sha256.h"
+#include "psa/crypto.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
@@ -47,7 +47,21 @@ static void generate_mqtt_credentials(const char *salt, char *username_out, char
     snprintf(salted_input, sizeof(salted_input), "%s%s", username_out, salt);
 
     uint8_t hash[32];
-    mbedtls_sha256((const unsigned char *)salted_input, strlen(salted_input), hash, 0);
+    size_t hash_len;
+
+    psa_status_t status = psa_hash_compute(
+        PSA_ALG_SHA_256,
+        (const uint8_t *)salted_input,
+        strlen(salted_input),
+        hash,
+        sizeof(hash),
+        &hash_len
+    );
+    if (status != PSA_SUCCESS)
+    {
+        ESP_LOGE(TAG, "failed to compute SHA256 hash, error: %d", status);
+        memset(hash, 0, sizeof(hash));
+    }
 
     for (int i = 0; i < 32; i++) sprintf(&password_out[i * 2], "%02x", hash[i]);
 }

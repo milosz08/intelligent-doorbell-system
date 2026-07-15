@@ -6,8 +6,8 @@ idf_component_register(
         "include"
 
     REQUIRES
-        driver
         ds18b20
+        esp_driver_gpio
         esp_timer
         onewire_bus
 )

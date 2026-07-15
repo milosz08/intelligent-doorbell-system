@@ -6,7 +6,7 @@ idf_component_register(
         "include"
 
     REQUIRES
-        json
+        cjson
         mqtt
         mbedtls
         esp_hw_support

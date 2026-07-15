@@ -6,6 +6,8 @@
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
 #include "esp_eth.h"
+#include "esp_eth_mac_w5500.h"
+#include "esp_eth_phy_w5500.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_mac.h"
@@ -130,7 +132,7 @@ esp_err_t eth_w5500_init(const eth_callbacks_t *callbacks)
     };
 
     eth_w5500_config_t w5500_config = ETH_W5500_DEFAULT_CONFIG(ETH_SPI_HOST, &spi_devcfg);
-    w5500_config.int_gpio_num = ETH_SPI_INT_GPIO;
+    w5500_config.base.int_gpio_num = ETH_SPI_INT_GPIO;
 
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
     esp_eth_mac_t *mac = esp_eth_mac_new_w5500(&w5500_config, &mac_config);

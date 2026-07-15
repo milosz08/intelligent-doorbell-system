@@ -6,8 +6,8 @@ idf_component_register(
         "include"
 
     REQUIRES
+        cjson
         freertos
-        json
         env_sensor
         mqtt_registry
 )

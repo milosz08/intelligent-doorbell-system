@@ -1,3 +1,6 @@
 dependencies:
-  espressif/mdns: "^1.11.0"
-  espressif/ds18b20: "^0.3.0"
+  espressif/mdns: '*'
+  espressif/ds18b20: '*'
+  espressif/mqtt: '*'
+  espressif/cjson: '*'
+  espressif/w5500: '*'

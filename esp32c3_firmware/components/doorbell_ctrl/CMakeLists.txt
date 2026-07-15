@@ -1,10 +1,10 @@
 idf_component_register(
-  SRCS
-    "doorbell_ctrl.c"
+    SRCS
+        "doorbell_ctrl.c"
 
-  INCLUDE_DIRS
-    "include"
+    INCLUDE_DIRS
+        "include"
 
-  REQUIRES
-    driver
+    REQUIRES
+        esp_driver_gpio
 )

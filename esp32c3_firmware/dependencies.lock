@@ -1,17 +1,33 @@
 dependencies:
+  espressif/cjson:
+    component_hash: e788323270d90738662d66fffa910bfe1fba019bba087f01557e70c40485b469
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.7.19~2
   espressif/ds18b20:
-    component_hash: e637047f6142a837dee081334298aed94ba221029794817649e781b6c3cd14a3
+    component_hash: 38022d0c39c08b1df3e77f95a3f9544251549a1fd9b6263357bf714026f4bb6b
     dependencies:
     - name: espressif/onewire_bus
       registry_url: https://components.espressif.com
       require: private
-      version: ^1.0.0
+      version: ^1.1.0
+    - matches:
+      - if: $CONFIG{DS18B20_SENSOR_HUB} == True
+      name: espressif/sensor_hub
+      registry_url: https://components.espressif.com
+      require: public
+      version: ^0.1.4
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 0.3.0
+    version: 0.4.0
   espressif/mdns:
-    component_hash: 1ebe3bd675bb9d1c58f52bc0b609b32f74e572b01c328f9e61282040c775495c
+    component_hash: e81ca7a7f53ea34e78274df054da692c272e1315572876b237b1748e267c013b
     dependencies:
     - name: idf
       require: private
@@ -19,9 +35,19 @@ dependencies:
     source:
       registry_url: https://components.espressif.com/
       type: service
-    version: 1.11.0
+    version: 1.11.3
+  espressif/mqtt:
+    component_hash: ffdad5659706b4dc14bc63f8eb73ef765efa015bf7e9adf71c813d52a2dc9342
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.3'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.0
   espressif/onewire_bus:
-    component_hash: d709015ba466095259228521cf1bad9c0cdaaa42a92ea5d9c88ec6c28ae89e9b
+    component_hash: a85dc1ceb71fb87af77c57d5fd4e6f48a504de1fc2b83fc302ec0cea331d05ce
     dependencies:
     - name: idf
       require: private
@@ -29,14 +55,41 @@ dependencies:
     source:
       registry_url: https://components.espressif.com
       type: service
-    version: 1.1.0
+    version: 1.1.1
+  espressif/w5500:
+    component_hash: b5f5b466dd0b8f1f2de7ac5b7e4a364e993daf40c999044a54fb545e25be8aba
+    dependencies:
+    - name: espressif/wiznet_common
+      registry_url: https://components.espressif.com
+      require: private
+      version: ^1.0.0
+    - name: idf
+      require: private
+      version: '>=6.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 2.0.0
+  espressif/wiznet_common:
+    component_hash: 57414f4b8ce11295c03030da7ff3ef90184e07b3ba1e8985b5edb2461e9be780
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.3'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 1.0.0
   idf:
     source:
       type: idf
-    version: 5.5.2
+    version: 6.2.0
 direct_dependencies:
+- espressif/cjson
 - espressif/ds18b20
 - espressif/mdns
-manifest_hash: 100e0ddd01d96bedd1c726cef9ef89f5c3bcc503c312f7e63b87e956e04fde02
+- espressif/mqtt
+- espressif/w5500
+manifest_hash: 9cdf5a685467b57f4368fffda1fff8de2dea88b37366bf40b278c28ab41d3c13
 target: esp32c3
-version: 2.0.0
+version: 3.0.0
