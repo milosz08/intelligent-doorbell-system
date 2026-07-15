@@ -3,10 +3,6 @@ esp32c3_firmware/managed_components/
 esp32c3_firmware/sdkconfig
 esp32c3_firmware/sdkconfig.old
 
-relay_server/.idea/
-relay_server/!.idea/misc.xml
-relay_server/!.idea/inspectionProfiles/
-relay_server/!.idea/codeStyles/
 relay_server/.bin
 relay_server/.gradle
 relay_server/build/
